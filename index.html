@@ -12,7 +12,7 @@
             padding: 0;
         }
 
-        body {
+        html, body {
             background-color: #F5F5F5;
             color: #000;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -20,6 +20,7 @@
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
             width: 100vw;
+            height: 100vh;
         }
 
         /* Fixed Minimal Header */
@@ -27,7 +28,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 100vw;
             z-index: 999;
             display: flex;
             justify-content: space-between;
@@ -90,6 +91,7 @@
             width: 100vw;
             height: 100vh;
             overflow-y: scroll;
+            overflow-x: hidden;
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
             padding-top: 148px;
@@ -117,7 +119,7 @@
             aspect-ratio: 16 / 9;
             background-color: #F5F5F5;
             overflow: hidden;
-            cursor: default; /* Cursor won't change on hover */
+            cursor: default; /* Cursor does not change on hover */
         }
 
         .poster { 
@@ -140,7 +142,7 @@
 
         .video-wrapper iframe { 
             width: 100%; height: 100%; 
-            pointer-events: auto; /* Allow clicking video to trigger fullscreen */
+            pointer-events: auto; 
             transform: scale(1.35); 
         }
 
@@ -199,6 +201,37 @@
             width: 20px; 
             height: 20px; 
             border: 1px solid rgba(255,255,255,0.2); 
+        }
+
+        /* Custom In-Fullscreen Exit Button UI */
+        .fullscreen-exit-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #FFF;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            z-index: 99999;
+            display: none; /* Hidden by default when not in fullscreen */
+            transition: background 0.2s ease;
+        }
+
+        .fullscreen-exit-btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+        }
+
+        /* Show the exit button when this container is in fullscreen */
+        .project-frame:fullscreen .fullscreen-exit-btn,
+        .project-frame:-webkit-full-screen .fullscreen-exit-btn,
+        .project-frame:-ms-fullscreen .fullscreen-exit-btn {
+            display: block;
         }
 
         /* Responsive */
@@ -351,6 +384,7 @@
 
                 row.innerHTML = `
                     <div class="project-frame" id="frame-${index}">
+                        <button class="fullscreen-exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
                         <div class="poster" id="poster-${index}" style="background-image: url('${project.poster}');"></div>
                         <div class="video-wrapper"><div id="${uniqueId}"></div></div>
                         <div class="meta-overlay">
@@ -408,6 +442,7 @@
         function setupInteractions() {
             masterProjectCatalog.forEach((project, index) => {
                 const frame = document.getElementById('frame-' + index);
+                const exitBtn = document.getElementById('exit-btn-' + index);
                 const playerKey = 'yt-player-' + index;
                 const poster = document.getElementById('poster-' + index);
 
@@ -430,17 +465,37 @@
                         }
                     });
 
-                    // Click on frame to fullscreen container
+                    // Click frame to go fullscreen
                     frame.addEventListener('click', (e) => {
-                        // Avoid double triggering if clicking directly inside iframe element if caught
-                        if (frame.requestFullscreen) {
-                            frame.requestFullscreen();
-                        } else if (frame.webkitRequestFullscreen) {
-                            frame.webkitRequestFullscreen();
-                        } else if (frame.msRequestFullscreen) {
-                            frame.msRequestFullscreen();
+                        // Prevent click if clicking directly on the exit button
+                        if (e.target === exitBtn) return;
+
+                        if (!document.fullscreenElement) {
+                            if (frame.requestFullscreen) {
+                                frame.requestFullscreen();
+                            } else if (frame.webkitRequestFullscreen) {
+                                frame.webkitRequestFullscreen();
+                            } else if (frame.msRequestFullscreen) {
+                                frame.msRequestFullscreen();
+                            }
                         }
                     });
+
+                    // Click custom in-screen exit button to exit fullscreen
+                    if (exitBtn) {
+                        exitBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (document.fullscreenElement) {
+                                if (document.exitFullscreen) {
+                                    document.exitFullscreen();
+                                } else if (document.webkitExitFullscreen) {
+                                    document.webkitExitFullscreen();
+                                } else if (document.msExitFullscreen) {
+                                    document.msExitFullscreen();
+                                }
+                            }
+                        });
+                    }
                 }
             });
         }
@@ -482,6 +537,9 @@
             setTimeout(() => {
                 setupInteractions();
                 setupObserver();
+                const mainEl = document.getElementById('feed-container');
+                if (mainEl) mainEl.scrollTop = 0;
+                window.scrollTo(0, 0);
             }, 500);
         }
 
@@ -491,6 +549,9 @@
             setTimeout(() => {
                 setupInteractions();
                 setupObserver();
+                const mainEl = document.getElementById('feed-container');
+                if (mainEl) mainEl.scrollTop = 0;
+                window.scrollTo(0, 0);
             }, 500);
         } else {
             buildFeed();
