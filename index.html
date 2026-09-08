@@ -18,12 +18,11 @@
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-transform: uppercase;
             -webkit-font-smoothing: antialiased;
-            overflow: hidden; 
-            height: 100vh;
+            overflow-x: hidden;
             width: 100vw;
         }
 
-        /* Header: Left Logo, Vertically Centered Company Name, Right Nav */
+        /* Fixed Minimal Header */
         header {
             position: fixed;
             top: 0;
@@ -52,11 +51,11 @@
         }
 
         .company-name {
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 22px;
             font-weight: 900;
             letter-spacing: 1px;
             line-height: 1;
+            color: #000;
         }
 
         .header-nav {
@@ -70,15 +69,10 @@
             padding: 10px 24px;
             text-decoration: none;
             color: #000;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-weight: 900;
             font-size: 11px;
             letter-spacing: 1.5px;
             transition: background-color 0s, color 0s;
-        }
-
-        .header-nav a::after {
-            display: none;
         }
 
         .header-nav a.active {
@@ -91,40 +85,26 @@
             color: #F5F5F5;
         }
 
-        /* Fullscreen Project Deck */
+        /* Continuous Vertical Feed with Matching Background */
         main {
-            position: relative;
             width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #080808;
-            padding-top: 148px; 
-            padding-bottom: 40px;
+            padding-top: 148px;
+            background-color: #F5F5F5;
         }
 
-        .project-slide {
-            position: absolute;
-            top: 148px;
-            left: 0;
+        .project-row {
+            position: relative;
             width: 100vw;
             height: calc(100vh - 148px);
+            min-height: 600px;
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease-in-out;
-            z-index: 1;
+            background-color: #F5F5F5;
+            border-bottom: 1px solid #000;
         }
 
-        .project-slide.active {
-            opacity: 1;
-            pointer-events: auto;
-            z-index: 10;
-        }
-
-        /* Centered Cinematic Frame */
-        .slide-frame {
+        .project-frame {
             position: relative;
             width: 80vw;
             max-width: 1400px;
@@ -157,7 +137,7 @@
             transform: scale(1.35); 
         }
 
-        /* Meta Overlay per Slide */
+        /* Hover Overlay */
         .meta-overlay {
             position: absolute;
             top: 0; left: 0;
@@ -167,13 +147,17 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 32px;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.4);
             color: #FFF;
+            opacity: 0;
+            transition: opacity 0.3s ease;
             pointer-events: none;
         }
 
+        .project-frame:hover .poster { opacity: 0; }
+        .project-frame:hover .meta-overlay { opacity: 1; }
+
         .meta-top {
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 11px;
             letter-spacing: 2px;
             font-weight: 900;
@@ -186,7 +170,6 @@
         }
 
         .meta-title {
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 32px;
             font-weight: 900;
             letter-spacing: -0.5px;
@@ -194,7 +177,6 @@
         }
 
         .meta-director {
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 13px;
             letter-spacing: 1px;
             color: #CCC;
@@ -217,13 +199,15 @@
             header { padding: 20px 24px; }
             .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
-            .slide-frame { width: 92vw; }
+            .project-frame { width: 92vw; }
+            main { padding-top: 110px; }
+            .project-row { height: calc(100vh - 110px); }
         }
 
         @media (max-width: 768px) {
             header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
             main { padding-top: 130px; }
-            .project-slide { top: 130px; height: calc(100vh - 130px); }
+            .project-row { height: calc(100vh - 130px); }
             .header-left img { height: 50px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
@@ -244,8 +228,8 @@
         </nav>
     </header>
 
-    <main id="slide-container">
-        <!-- Slides injected via JS -->
+    <main id="feed-container">
+        <!-- Rows injected via JS -->
     </main>
 
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -344,26 +328,22 @@
         ];
 
         const players = {};
-        let currentIndex = 0;
-        let isAnimating = false;
+        const feedContainer = document.getElementById('feed-container');
 
-        const mainContainer = document.getElementById('slide-container');
-
-        function buildDeck() {
+        function buildFeed() {
             masterProjectCatalog.forEach((project, index) => {
-                const uniqueId = 'slide-player-' + index;
-
-                const slide = document.createElement('div');
-                slide.className = `project-slide ${index === 0 ? 'active' : ''}`;
-                slide.setAttribute('data-index', index);
+                const uniqueId = 'yt-player-' + index;
+                const row = document.createElement('div');
+                row.className = 'project-row';
+                row.setAttribute('data-index', index);
 
                 let swatchesHtml = '';
                 project.colors.forEach(hex => {
                     swatchesHtml += `<div class="swatch" style="background: ${hex};"></div>`;
                 });
 
-                slide.innerHTML = `
-                    <div class="slide-frame">
+                row.innerHTML = `
+                    <div class="project-frame" id="frame-${index}">
                         <div class="poster" id="poster-${index}" style="background-image: url('${project.poster}');"></div>
                         <div class="video-wrapper"><div id="${uniqueId}"></div></div>
                         <div class="meta-overlay">
@@ -380,18 +360,18 @@
                         </div>
                     </div>
                 `;
-                mainContainer.appendChild(slide);
+                feedContainer.appendChild(row);
             });
         }
 
         function initPlayers() {
             masterProjectCatalog.forEach((project, index) => {
-                const uniqueId = 'slide-player-' + index;
+                const uniqueId = 'yt-player-' + index;
                 if (window.YT && window.YT.Player) {
                     players[uniqueId] = new YT.Player(uniqueId, {
                         videoId: project.id,
                         playerVars: { 
-                            'autoplay': (index === 0 ? 1 : 0), 
+                            'autoplay': 0, 
                             'controls': 0, 
                             'mute': 1, 
                             'rel': 0, 
@@ -417,71 +397,49 @@
             });
         }
 
-        function goToSlide(newIndex) {
-            if (isAnimating || newIndex === currentIndex) return;
-            if (newIndex < 0 || newIndex >= masterProjectCatalog.length) return;
+        function setupObserver() {
+            const observerOptions = {
+                root: null,
+                threshold: 0.6 
+            };
 
-            isAnimating = true;
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const index = entry.target.getAttribute('data-index');
+                    const playerKey = 'yt-player-' + index;
+                    const player = players[playerKey];
+                    const poster = document.getElementById('poster-' + index);
 
-            const oldPlayerId = 'slide-player-' + currentIndex;
-            if (players[oldPlayerId] && players[oldPlayerId].pauseVideo) {
-                players[oldPlayerId].pauseVideo();
-                const oldPoster = document.getElementById('poster-' + currentIndex);
-                if(oldPoster) oldPoster.style.opacity = '1';
-            }
+                    if (entry.isIntersecting) {
+                        if (player && player.playVideo) {
+                            player.playVideo();
+                        }
+                    } else {
+                        if (player && player.pauseVideo) {
+                            player.pauseVideo();
+                            if (poster) poster.style.opacity = '1';
+                        }
+                    }
+                });
+            }, observerOptions);
 
-            const slides = document.querySelectorAll('.project-slide');
-
-            slides[currentIndex].classList.remove('active');
-            currentIndex = newIndex;
-            slides[currentIndex].classList.add('active');
-
-            const newPlayerId = 'slide-player-' + currentIndex;
-            if (players[newPlayerId] && players[newPlayerId].playVideo) {
-                players[newPlayerId].playVideo();
-            }
-
-            setTimeout(() => {
-                isAnimating = false;
-            }, 500);
+            document.querySelectorAll('.project-row').forEach(row => {
+                observer.observe(row);
+            });
         }
 
-        window.addEventListener('wheel', (e) => {
-            if (Math.abs(e.deltaY) < 30) return;
-            if (e.deltaY > 0) {
-                goToSlide(currentIndex + 1);
-            } else {
-                goToSlide(currentIndex - 1);
-            }
-        }, { passive: true });
-
-        let touchStartY = 0;
-        window.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        window.addEventListener('touchend', (e) => {
-            let touchEndY = e.changedTouches[0].clientY;
-            let diff = touchStartY - touchEndY;
-            if (Math.abs(diff) > 50) {
-                if (diff > 0) {
-                    goToSlide(currentIndex + 1);
-                } else {
-                    goToSlide(currentIndex - 1);
-                }
-            }
-        }, { passive: true });
-
         function onYouTubeIframeAPIReady() {
-            buildDeck();
+            buildFeed();
             initPlayers();
+            setTimeout(setupObserver, 500);
         }
 
         if (window.YT && window.YT.Player) {
-            buildDeck();
+            buildFeed();
             initPlayers();
+            setTimeout(setupObserver, 500);
         } else {
-            buildDeck();
+            buildFeed();
         }
     </script>
 </body>
