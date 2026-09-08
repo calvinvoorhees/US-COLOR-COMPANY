@@ -114,11 +114,13 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease-in-out;
+            z-index: 1;
         }
 
         .project-slide.active {
             opacity: 1;
             pointer-events: auto;
+            z-index: 10;
         }
 
         /* Centered Cinematic Frame */
@@ -155,7 +157,7 @@
             transform: scale(1.35); 
         }
 
-        /* Always-visible Meta Overlay per Slide */
+        /* Meta Overlay per Slide */
         .meta-overlay {
             position: absolute;
             top: 0; left: 0;
@@ -405,7 +407,6 @@
                                 if(e.data === YT.PlayerState.ENDED) e.target.playVideo(); 
                                 if(e.data === YT.PlayerState.PLAYING) {
                                     e.target.setPlaybackQuality('hd1080');
-                                    // Fade out poster once video starts playing
                                     const poster = document.getElementById('poster-' + index);
                                     if(poster) poster.style.opacity = '0';
                                 }
@@ -422,7 +423,6 @@
 
             isAnimating = true;
 
-            // Pause old video and restore its poster
             const oldPlayerId = 'slide-player-' + currentIndex;
             if (players[oldPlayerId] && players[oldPlayerId].pauseVideo) {
                 players[oldPlayerId].pauseVideo();
@@ -436,7 +436,6 @@
             currentIndex = newIndex;
             slides[currentIndex].classList.add('active');
 
-            // Play new video automatically
             const newPlayerId = 'slide-player-' + currentIndex;
             if (players[newPlayerId] && players[newPlayerId].playVideo) {
                 players[newPlayerId].playVideo();
