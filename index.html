@@ -18,7 +18,7 @@
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-transform: uppercase;
             -webkit-font-smoothing: antialiased;
-            overflow: hidden;
+            overflow: hidden; /* Prevent body scroll, let main handle it */
             width: 100vw;
             height: 100vh;
         }
@@ -29,7 +29,6 @@
             top: 0;
             left: 0;
             width: 100vw;
-            height: 148px;
             z-index: 999;
             display: flex;
             justify-content: space-between;
@@ -87,13 +86,10 @@
             color: #F5F5F5;
         }
 
-        /* Perfectly Positioned Scroll Container Below Header */
+        /* Scroll Container */
         main {
-            position: fixed;
-            top: 148px;
-            left: 0;
             width: 100vw;
-            height: calc(100vh - 148px);
+            height: 100vh;
             overflow-y: scroll;
             overflow-x: hidden;
             scroll-snap-type: y mandatory;
@@ -101,14 +97,19 @@
             background-color: #F5F5F5;
         }
 
+        /* 
+           Each row is 100vh and snaps to the top. 
+           The padding-top matches the header height, pushing the flex center 
+           perfectly into the middle of the remaining visible space. 
+        */
         .project-row {
             position: relative;
             width: 100vw;
-            height: 100%;
-            min-height: 500px;
+            height: 100vh; 
             display: flex;
             justify-content: center;
             align-items: center;
+            padding-top: 148px; 
             background-color: #F5F5F5;
             border-bottom: 1px solid #000;
             scroll-snap-align: start;
@@ -123,6 +124,15 @@
             background-color: #F5F5F5;
             overflow: hidden;
             cursor: default;
+        }
+
+        /* Fullscreen Smoothing */
+        .project-frame:fullscreen,
+        .project-frame:-webkit-full-screen {
+            background-color: #000;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
         }
 
         .poster { 
@@ -140,7 +150,7 @@
             top: 0; left: 0; 
             width: 100%; height: 100%; 
             z-index: 5; 
-            background-color: #F5F5F5;
+            background-color: inherit;
         }
 
         .video-wrapper iframe { 
@@ -204,53 +214,76 @@
             width: 20px; 
             height: 20px; 
             border: 1px solid rgba(255,255,255,0.2); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Custom In-Fullscreen Exit Button UI */
-        .fullscreen-exit-btn {
+        /* In-Fullscreen GUI Overlay */
+        .fullscreen-gui {
             position: absolute;
-            top: 24px;
-            right: 24px;
+            bottom: 32px;
+            left: 32px;
+            right: 32px;
+            z-index: 99999;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* Only show when element is natively fullscreen */
+        .project-frame:fullscreen .fullscreen-gui,
+        .project-frame:-webkit-full-screen .fullscreen-gui,
+        .project-frame:-ms-fullscreen .fullscreen-gui {
+            display: flex;
+        }
+
+        .fs-exit-hint {
+            color: #FFF;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.5);
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        .fs-mute-btn {
+            pointer-events: auto;
             background: rgba(0, 0, 0, 0.7);
             color: #FFF;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 24px;
+            font-family: inherit;
             font-size: 11px;
             font-weight: 900;
             letter-spacing: 1.5px;
             cursor: pointer;
-            z-index: 99999;
-            display: none;
-            transition: background 0.2s ease;
+            transition: all 0.2s ease;
         }
 
-        .fullscreen-exit-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
+        .fs-mute-btn:hover {
+            background: #FFF;
             color: #000;
-        }
-
-        .project-frame:fullscreen .fullscreen-exit-btn,
-        .project-frame:-webkit-full-screen .fullscreen-exit-btn,
-        .project-frame:-ms-fullscreen .fullscreen-exit-btn {
-            display: block;
         }
 
         /* Responsive */
         @media (max-width: 1200px) {
-            header { padding: 20px 24px; height: 110px; }
-            main { top: 110px; height: calc(100vh - 110px); }
+            header { padding: 20px 24px; }
             .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
             .project-frame { width: 92vw; }
+            /* Adjust offset for smaller header */
+            .project-row { padding-top: 110px; }
         }
 
         @media (max-width: 768px) {
-            header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; height: 130px; }
-            main { top: 130px; height: calc(100vh - 130px); }
+            header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
             .header-left img { height: 50px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
+            /* Adjust offset for stacked header */
+            .project-row { padding-top: 130px; }
         }
     </style>
 </head>
@@ -282,7 +315,7 @@
                 genre: "MUSIC VIDEO",
                 title: "WORST FRIEND",
                 director: "JAXON RAY",
-                colors: ["#151515", "#332222", "#553333", "#C4B9A5"]
+                colors: ["#2B2A27", "#766C5B", "#A44A3F", "#E6D6C5"]
             },
             {
                 id: "zbEuFbgax4I",
@@ -291,7 +324,7 @@
                 genre: "MUSIC VIDEO",
                 title: "SISTERS: LIBERTY",
                 director: "JAXON RAY",
-                colors: ["#0D1B2A", "#415A77", "#778DA9", "#E0E1DD"]
+                colors: ["#0B1320", "#2F4858", "#86BBD8", "#F6F7F8"]
             },
             {
                 id: "5AFCwd9ylW8",
@@ -300,7 +333,7 @@
                 genre: "NARRATIVE",
                 title: "LILY RATCHET",
                 director: "DOM LOPEZ",
-                colors: ["#1A1A1A", "#4A5D23", "#8B4513", "#D3C5B4"]
+                colors: ["#1C1E18", "#4A5240", "#D3A052", "#E8E9E1"]
             },
             {
                 id: "n1TBUxlOryY",
@@ -309,7 +342,7 @@
                 genre: "NARRATIVE",
                 title: "PYGMY",
                 director: "JACOB FREIBERG",
-                colors: ["#111111", "#333333", "#666666", "#CCCCCC"]
+                colors: ["#0D0F12", "#2B3A42", "#8D99AE", "#EF233C"]
             },
             {
                 id: "EAJ0jstt1n4",
@@ -318,7 +351,7 @@
                 genre: "NARRATIVE",
                 title: "UNLEAVENED",
                 director: "RAINA JABLON",
-                colors: ["#2C221E", "#5A4A42", "#8C7355", "#E3D5C6"]
+                colors: ["#1F1A17", "#5E4A3D", "#A68065", "#EADDCD"]
             },
             {
                 id: "w2CBEvLpNAE",
@@ -327,7 +360,7 @@
                 genre: "COMMERCIAL",
                 title: "BORING",
                 director: "CALEB ARGUETA",
-                colors: ["#202020", "#404040", "#707070", "#EAEAEA"]
+                colors: ["#181818", "#4A4A4A", "#9CA3AF", "#F3F4F6"]
             },
             {
                 id: "dd3SpVXwUWY",
@@ -336,7 +369,7 @@
                 genre: "NARRATIVE",
                 title: "BUT WHAT IF",
                 director: "JAMES STEICHEN",
-                colors: ["#1A1F2C", "#3F4C6B", "#6C7A89", "#D8D8D8"]
+                colors: ["#0A0910", "#3F376B", "#7A709E", "#D8B4E2"]
             },
             {
                 id: "bHKoN1Yk1xs",
@@ -345,7 +378,7 @@
                 genre: "NARRATIVE",
                 title: "SLASHER SLASHER",
                 director: "TAMRICK ELSE",
-                colors: ["#110505", "#5C1D1D", "#A83232", "#D1B894"]
+                colors: ["#000000", "#3E0C0C", "#8B0000", "#D9C5B2"]
             },
             {
                 id: "QMa25zeu9EQ",
@@ -354,7 +387,7 @@
                 genre: "DOCUMENTARY",
                 title: "ABANDOMINIUM",
                 director: "DOM LOPEZ",
-                colors: ["#1A1C1E", "#38424B", "#62707D", "#9AA6B2"]
+                colors: ["#1A1C1E", "#3E463F", "#707A71", "#C2C6C2"]
             },
             {
                 id: "fMV2PuvFwe8",
@@ -363,7 +396,7 @@
                 genre: "MUSIC VIDEO",
                 title: "UDONTRLLYCAREABME",
                 director: "HARI GANESH",
-                colors: ["#121212", "#3A3A3A", "#606060", "#B0B0B0"]
+                colors: ["#121015", "#3A2E47", "#D980FA", "#FDA7DF"]
             }
         ];
 
@@ -384,7 +417,10 @@
 
                 row.innerHTML = `
                     <div class="project-frame" id="frame-${index}">
-                        <button class="fullscreen-exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
+                        <div class="fullscreen-gui">
+                            <div class="fs-exit-hint">ESC TO EXIT FULLSCREEN</div>
+                            <button class="fs-mute-btn" id="mute-btn-${index}">MUTE</button>
+                        </div>
                         <div class="poster" id="poster-${index}" style="background-image: url('${project.poster}');"></div>
                         <div class="video-wrapper"><div id="${uniqueId}"></div></div>
                         <div class="meta-overlay">
@@ -429,6 +465,10 @@
                                 if(e.data === YT.PlayerState.PLAYING) {
                                     e.target.setPlaybackQuality('hd1080');
                                     e.target.unMute();
+                                    
+                                    const muteBtn = document.getElementById('mute-btn-' + index);
+                                    if(muteBtn) muteBtn.innerText = e.target.isMuted() ? "UNMUTE" : "MUTE";
+
                                     const poster = document.getElementById('poster-' + index);
                                     if(poster) poster.style.opacity = '0';
                                 }
@@ -442,7 +482,7 @@
         function setupInteractions() {
             masterProjectCatalog.forEach((project, index) => {
                 const frame = document.getElementById('frame-' + index);
-                const exitBtn = document.getElementById('exit-btn-' + index);
+                const muteBtn = document.getElementById('mute-btn-' + index);
                 const playerKey = 'yt-player-' + index;
                 const poster = document.getElementById('poster-' + index);
 
@@ -451,11 +491,14 @@
                         const player = players[playerKey];
                         if (player && player.playVideo) {
                             player.unMute();
+                            if (muteBtn) muteBtn.innerText = "MUTE";
                             player.playVideo();
                         }
                     });
 
                     frame.addEventListener('mouseleave', () => {
+                        if (document.fullscreenElement) return;
+
                         const player = players[playerKey];
                         if (player && player.pauseVideo) {
                             player.pauseVideo();
@@ -464,7 +507,7 @@
                     });
 
                     frame.addEventListener('click', (e) => {
-                        if (e.target === exitBtn) return;
+                        if (e.target === muteBtn) return; 
 
                         if (!document.fullscreenElement) {
                             if (frame.requestFullscreen) {
@@ -477,16 +520,17 @@
                         }
                     });
 
-                    if (exitBtn) {
-                        exitBtn.addEventListener('click', (e) => {
+                    if (muteBtn) {
+                        muteBtn.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            if (document.fullscreenElement) {
-                                if (document.exitFullscreen) {
-                                    document.exitFullscreen();
-                                } else if (document.webkitExitFullscreen) {
-                                    document.webkitExitFullscreen();
-                                } else if (document.msExitFullscreen) {
-                                    document.msExitFullscreen();
+                            const player = players[playerKey];
+                            if (player) {
+                                if (player.isMuted()) {
+                                    player.unMute();
+                                    muteBtn.innerText = "MUTE";
+                                } else {
+                                    player.mute();
+                                    muteBtn.innerText = "UNMUTE";
                                 }
                             }
                         });
@@ -535,7 +579,6 @@
                 setupObserver();
                 const mainEl = document.getElementById('feed-container');
                 if (mainEl) mainEl.scrollTop = 0;
-                window.scrollTo(0, 0);
             }, 300);
         }
 
@@ -547,7 +590,6 @@
                 setupObserver();
                 const mainEl = document.getElementById('feed-container');
                 if (mainEl) mainEl.scrollTop = 0;
-                window.scrollTo(0, 0);
             }, 300);
         } else {
             buildFeed();
