@@ -18,7 +18,7 @@
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-transform: uppercase;
             -webkit-font-smoothing: antialiased;
-            overflow: hidden; /* Lock window scroll to enforce single-page snap */
+            overflow: hidden; 
             height: 100vh;
             width: 100vw;
         }
@@ -98,7 +98,7 @@
             height: 100vh;
             overflow: hidden;
             background-color: #080808;
-            padding-top: 148px; /* Account for fixed header height */
+            padding-top: 148px; 
             padding-bottom: 40px;
         }
 
@@ -218,12 +218,19 @@
             border: 1px solid rgba(255,255,255,0.2); 
         }
 
-        /* Non-text Indicator (Minimalist Grid/Bar Dots at bottom right) */
+        /* Non-text Indicator (Minimalist Dots with Pulsing Arrow Indicator for scrolling) */
         .scroll-indicator {
             position: fixed;
             bottom: 32px;
             right: 48px;
             z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .dots-row {
             display: flex;
             gap: 8px;
             align-items: center;
@@ -241,6 +248,22 @@
             width: 24px;
             border-radius: 3px;
             background-color: #000;
+        }
+
+        /* Minimal non-text down-arrow indicator */
+        .scroll-arrow {
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid #000;
+            border-bottom: 2px solid #000;
+            transform: rotate(45deg);
+            animation: pulseArrow 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseArrow {
+            0% { transform: rotate(45deg) translate(0, 0); opacity: 0.3; }
+            50% { transform: rotate(45deg) translate(4px, 4px); opacity: 1; }
+            100% { transform: rotate(45deg) translate(0, 0); opacity: 0.3; }
         }
 
         /* Responsive */
@@ -266,7 +289,7 @@
 
     <header>
         <div class="header-left">
-            <img src="logonobg4cal.PNG" alt="US COLOR COMPANY LOGO">
+            <img src="uscolorcompanyLOGO.png" alt="US COLOR COMPANY LOGO">
             <div class="company-name">US COLOR COMPANY</div>
         </div>
         <nav class="header-nav">
@@ -277,11 +300,12 @@
     </header>
 
     <main id="slide-container">
-        <!-- Slides will be injected dynamically via JavaScript -->
+        <!-- Slides injected via JS -->
     </main>
 
     <div class="scroll-indicator" id="indicator-container">
-        <!-- Non-text indicator dots generated dynamically -->
+        <div class="dots-row" id="dots-row"></div>
+        <div class="scroll-arrow"></div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -340,6 +364,42 @@
                 title: "WORST FRIEND",
                 director: "DOM LOPEZ",
                 colors: ["#151515", "#332222", "#553333", "#C4B9A5"]
+            },
+            {
+                id: "dQw4w9WgXcQ", 
+                poster: "unleavened.jpg",
+                year: "2025",
+                genre: "NARRATIVE",
+                title: "UNLEAVENED",
+                director: "CALVIN VOORHEES",
+                colors: ["#2C221E", "#5A4A42", "#8C7355", "#E3D5C6"]
+            },
+            {
+                id: "LXb3EKWsInQ",
+                poster: "pygmy.jpg",
+                year: "2025",
+                genre: "MUSIC VIDEO",
+                title: "PYGMY",
+                director: "DOM LOPEZ",
+                colors: ["#111111", "#333333", "#666666", "#CCCCCC"]
+            },
+            {
+                id: "FDAwFQjHe2A",
+                poster: "whatif.jpg",
+                year: "2024",
+                genre: "EXPERIMENTAL",
+                title: "WHAT IF",
+                director: "CALVIN VOORHEES",
+                colors: ["#1A1F2C", "#3F4C6B", "#6C7A89", "#D8D8D8"]
+            },
+            {
+                id: "DnyTimaQ0p4",
+                poster: "boring.jpg",
+                year: "2024",
+                genre: "COMMERCIAL",
+                title: "BORING",
+                director: "JAXON RAY",
+                colors: ["#202020", "#404040", "#707070", "#EAEAEA"]
             }
         ];
 
@@ -348,13 +408,12 @@
         let isAnimating = false;
 
         const mainContainer = document.getElementById('slide-container');
-        const indicatorContainer = document.getElementById('indicator-container');
+        const dotsRow = document.getElementById('dots-row');
 
         function buildDeck() {
             masterProjectCatalog.forEach((project, index) => {
                 const uniqueId = 'slide-player-' + index;
 
-                // Create Slide
                 const slide = document.createElement('div');
                 slide.className = `project-slide ${index === 0 ? 'active' : ''}`;
                 slide.setAttribute('data-index', index);
@@ -384,10 +443,9 @@
                 `;
                 mainContainer.appendChild(slide);
 
-                // Create Indicator Dot
                 const dot = document.createElement('div');
                 dot.className = `indicator-dot ${index === 0 ? 'active' : ''}`;
-                indicatorContainer.appendChild(dot);
+                dotsRow.appendChild(dot);
             });
         }
 
@@ -426,7 +484,6 @@
 
             isAnimating = true;
 
-            // Pause current video
             const oldPlayerId = 'slide-player-' + currentIndex;
             if (players[oldPlayerId] && players[oldPlayerId].pauseVideo) {
                 players[oldPlayerId].pauseVideo();
@@ -443,7 +500,6 @@
             slides[currentIndex].classList.add('active');
             dots[currentIndex].classList.add('active');
 
-            // Play new video if hovered/active
             const newPlayerId = 'slide-player-' + currentIndex;
             const currentSlideElement = slides[currentIndex];
             if (window.innerWidth > 900 && currentSlideElement.querySelector('.slide-frame:hover')) {
@@ -454,12 +510,11 @@
 
             setTimeout(() => {
                 isAnimating = false;
-            }, 500); // Lockout duration for smooth snapping
+            }, 500);
         }
 
-        // Wheel Scroll Listener
         window.addEventListener('wheel', (e) => {
-            if (Math.abs(e.deltaY) < 30) return; // Prevent hyper-sensitive triggers
+            if (Math.abs(e.deltaY) < 30) return;
             if (e.deltaY > 0) {
                 goToSlide(currentIndex + 1);
             } else {
@@ -467,7 +522,6 @@
             }
         }, { passive: true });
 
-        // Touch / Swipe Support for Mobile
         let touchStartY = 0;
         window.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
@@ -485,7 +539,6 @@
             }
         }, { passive: true });
 
-        // Hover Play/Pause binding per slide
         function bindHoverEvents() {
             document.querySelectorAll('.slide-frame').forEach((frame, index) => {
                 const uniqueId = 'slide-player-' + index;
@@ -510,13 +563,11 @@
             bindHoverEvents();
         }
 
-        // Fallback if API loads instantly
         if (window.YT && window.YT.Player) {
             buildDeck();
             initPlayers();
             bindHoverEvents();
         } else {
-            // Build DOM even if API is pending
             buildDeck();
             bindHoverEvents();
         }
