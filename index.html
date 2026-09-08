@@ -117,7 +117,7 @@
             aspect-ratio: 16 / 9;
             background-color: #F5F5F5;
             overflow: hidden;
-            cursor: pointer;
+            cursor: default; /* Cursor won't change on hover */
         }
 
         .poster { 
@@ -140,7 +140,7 @@
 
         .video-wrapper iframe { 
             width: 100%; height: 100%; 
-            pointer-events: none; 
+            pointer-events: auto; /* Allow clicking video to trigger fullscreen */
             transform: scale(1.35); 
         }
 
@@ -430,8 +430,9 @@
                         }
                     });
 
-                    // Click to fullscreen the video frame container
-                    frame.addEventListener('click', () => {
+                    // Click on frame to fullscreen container
+                    frame.addEventListener('click', (e) => {
+                        // Avoid double triggering if clicking directly inside iframe element if caught
                         if (frame.requestFullscreen) {
                             frame.requestFullscreen();
                         } else if (frame.webkitRequestFullscreen) {
