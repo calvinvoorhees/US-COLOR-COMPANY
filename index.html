@@ -85,9 +85,13 @@
             color: #F5F5F5;
         }
 
-        /* Continuous Vertical Feed with Matching Background */
+        /* Continuous Vertical Feed with White Background & CSS Scroll Snap */
         main {
             width: 100vw;
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
             padding-top: 148px;
             background-color: #F5F5F5;
         }
@@ -102,6 +106,8 @@
             align-items: center;
             background-color: #F5F5F5;
             border-bottom: 1px solid #000;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
         }
 
         .project-frame {
@@ -109,9 +115,9 @@
             width: 80vw;
             max-width: 1400px;
             aspect-ratio: 16 / 9;
-            background-color: #000;
+            background-color: #F5F5F5;
             overflow: hidden;
-            cursor: crosshair;
+            cursor: pointer;
         }
 
         .poster { 
@@ -129,6 +135,7 @@
             top: 0; left: 0; 
             width: 100%; height: 100%; 
             z-index: 5; 
+            background-color: #F5F5F5;
         }
 
         .video-wrapper iframe { 
@@ -372,13 +379,13 @@
                         videoId: project.id,
                         playerVars: { 
                             'autoplay': 0, 
-                            'controls': 0, 
-                            'mute': 1, 
+                            'controls': 1, 
+                            'mute': 0, 
                             'rel': 0, 
                             'showinfo': 0, 
                             'modestbranding': 1, 
-                            'fs': 0, 
-                            'disablekb': 1, 
+                            'fs': 1, 
+                            'disablekb': 0, 
                             'playsinline': 1,
                             'origin': window.location.origin 
                         },
@@ -387,6 +394,7 @@
                                 if(e.data === YT.PlayerState.ENDED) e.target.playVideo(); 
                                 if(e.data === YT.PlayerState.PLAYING) {
                                     e.target.setPlaybackQuality('hd1080');
+                                    e.target.unMute();
                                     const poster = document.getElementById('poster-' + index);
                                     if(poster) poster.style.opacity = '0';
                                 }
@@ -397,9 +405,48 @@
             });
         }
 
+        function setupInteractions() {
+            masterProjectCatalog.forEach((project, index) => {
+                const frame = document.getElementById('frame-' + index);
+                const playerKey = 'yt-player-' + index;
+                const poster = document.getElementById('poster-' + index);
+
+                if (frame) {
+                    // Hover to play
+                    frame.addEventListener('mouseenter', () => {
+                        const player = players[playerKey];
+                        if (player && player.playVideo) {
+                            player.unMute();
+                            player.playVideo();
+                        }
+                    });
+
+                    // Mouse leave to pause
+                    frame.addEventListener('mouseleave', () => {
+                        const player = players[playerKey];
+                        if (player && player.pauseVideo) {
+                            player.pauseVideo();
+                            if (poster) poster.style.opacity = '1';
+                        }
+                    });
+
+                    // Click to fullscreen the video frame container
+                    frame.addEventListener('click', () => {
+                        if (frame.requestFullscreen) {
+                            frame.requestFullscreen();
+                        } else if (frame.webkitRequestFullscreen) {
+                            frame.webkitRequestFullscreen();
+                        } else if (frame.msRequestFullscreen) {
+                            frame.msRequestFullscreen();
+                        }
+                    });
+                }
+            });
+        }
+
         function setupObserver() {
             const observerOptions = {
-                root: null,
+                root: main,
                 threshold: 0.6 
             };
 
@@ -431,13 +478,19 @@
         function onYouTubeIframeAPIReady() {
             buildFeed();
             initPlayers();
-            setTimeout(setupObserver, 500);
+            setTimeout(() => {
+                setupInteractions();
+                setupObserver();
+            }, 500);
         }
 
         if (window.YT && window.YT.Player) {
             buildFeed();
             initPlayers();
-            setTimeout(setupObserver, 500);
+            setTimeout(() => {
+                setupInteractions();
+                setupObserver();
+            }, 500);
         } else {
             buildFeed();
         }
