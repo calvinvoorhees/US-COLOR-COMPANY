@@ -218,53 +218,6 @@
             border: 1px solid rgba(255,255,255,0.2); 
         }
 
-        /* Non-text Indicator */
-        .scroll-indicator {
-            position: fixed;
-            bottom: 32px;
-            right: 48px;
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .dots-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .indicator-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #999;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-
-        .indicator-dot.active {
-            width: 24px;
-            border-radius: 3px;
-            background-color: #000;
-        }
-
-        .scroll-arrow {
-            width: 10px;
-            height: 10px;
-            border-right: 2px solid #000;
-            border-bottom: 2px solid #000;
-            transform: rotate(45deg);
-            animation: pulseArrow 1.5s infinite ease-in-out;
-        }
-
-        @keyframes pulseArrow {
-            0% { transform: rotate(45deg) translate(0, 0); opacity: 0.3; }
-            50% { transform: rotate(45deg) translate(4px, 4px); opacity: 1; }
-            100% { transform: rotate(45deg) translate(0, 0); opacity: 0.3; }
-        }
-
         /* Responsive */
         @media (max-width: 1200px) {
             header { padding: 20px 24px; }
@@ -280,7 +233,6 @@
             .header-left img { height: 50px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
-            .scroll-indicator { right: 24px; bottom: 20px; }
         }
     </style>
 </head>
@@ -288,7 +240,6 @@
 
     <header>
         <div class="header-left">
-            <!-- Updated to match exact case-sensitive filename -->
             <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
             <div class="company-name">US COLOR COMPANY</div>
         </div>
@@ -302,11 +253,6 @@
     <main id="slide-container">
         <!-- Slides injected via JS -->
     </main>
-
-    <div class="scroll-indicator" id="indicator-container">
-        <div class="dots-row" id="dots-row"></div>
-        <div class="scroll-arrow"></div>
-    </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
@@ -408,7 +354,6 @@
         let isAnimating = false;
 
         const mainContainer = document.getElementById('slide-container');
-        const dotsRow = document.getElementById('dots-row');
 
         function buildDeck() {
             masterProjectCatalog.forEach((project, index) => {
@@ -442,10 +387,6 @@
                     </div>
                 `;
                 mainContainer.appendChild(slide);
-
-                const dot = document.createElement('div');
-                dot.className = `indicator-dot ${index === 0 ? 'active' : ''}`;
-                dotsRow.appendChild(dot);
             });
         }
 
@@ -490,15 +431,12 @@
             }
 
             const slides = document.querySelectorAll('.project-slide');
-            const dots = document.querySelectorAll('.indicator-dot');
 
             slides[currentIndex].classList.remove('active');
-            dots[currentIndex].classList.remove('active');
 
             currentIndex = newIndex;
 
             slides[currentIndex].classList.add('active');
-            dots[currentIndex].classList.add('active');
 
             const newPlayerId = 'slide-player-' + currentIndex;
             const currentSlideElement = slides[currentIndex];
