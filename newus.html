@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>US COLOR COMPANY</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #F5F5F5;
+            color: #000;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-transform: uppercase;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden; /* Lock window scroll to enforce single-page snap */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Header: Left Logo, Vertically Centered Company Name, Right Nav */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(245, 245, 245, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 24px 48px;
+            border-bottom: 1px solid #000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-left img {
+            height: 100px; 
+            width: auto;
+            display: block;
+        }
+
+        .company-name {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .header-nav a {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            text-decoration: none;
+            color: #000;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            transition: background-color 0s, color 0s;
+        }
+
+        .header-nav a::after {
+            display: none;
+        }
+
+        .header-nav a.active {
+            color: #000;
+            background-color: transparent;
+        }
+
+        .header-nav a:hover {
+            background-color: #000;
+            color: #F5F5F5;
+        }
+
+        /* Fullscreen Project Deck */
+        main {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #080808;
+            padding-top: 148px; /* Account for fixed header height */
+            padding-bottom: 40px;
+        }
+
+        .project-slide {
+            position: absolute;
+            top: 148px;
+            left: 0;
+            width: 100vw;
+            height: calc(100vh - 148px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .project-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Centered Cinematic Frame */
+        .slide-frame {
+            position: relative;
+            width: 80vw;
+            max-width: 1400px;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .poster { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background-size: cover; 
+            background-position: center; 
+            z-index: 10; 
+            transition: opacity 0.3s ease; 
+        }
+
+        .video-wrapper { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            z-index: 5; 
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-wrapper iframe { 
+            width: 100%; height: 100%; 
+            pointer-events: none; 
+            transform: scale(1.35); 
+        }
+
+        /* Hover Overlay */
+        .meta-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 32px;
+            background: rgba(0,0,0,0.4);
+            color: #FFF;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .slide-frame:hover .poster { opacity: 0; }
+        .slide-frame:hover .video-wrapper { opacity: 1; }
+        .slide-frame:hover .meta-overlay { opacity: 1; }
+
+        .meta-top {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        .meta-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .meta-title {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .meta-director {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            letter-spacing: 1px;
+            color: #CCC;
+            font-weight: 900;
+            margin-top: 6px;
+        }
+
+        .palette { 
+            display: flex; 
+            gap: 6px; 
+        }
+        .swatch { 
+            width: 20px; 
+            height: 20px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+        }
+
+        /* Non-text Indicator (Minimalist Grid/Bar Dots at bottom right) */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 32px;
+            right: 48px;
+            z-index: 999;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .indicator-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #999;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            width: 24px;
+            border-radius: 3px;
+            background-color: #000;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            header { padding: 20px 24px; }
+            .header-left img { height: 70px; }
+            .company-name { font-size: 16px; }
+            .slide-frame { width: 92vw; }
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
+            main { padding-top: 130px; }
+            .project-slide { top: 130px; height: calc(100vh - 130px); }
+            .header-left img { height: 50px; }
+            .company-name { font-size: 14px; }
+            .header-nav { width: 100%; justify-content: space-between; }
+            .scroll-indicator { right: 24px; bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <img src="logonobg4cal.PNG" alt="US COLOR COMPANY LOGO">
+            <div class="company-name">US COLOR COMPANY</div>
+        </div>
+        <nav class="header-nav">
+            <a href="index.html" class="active">WORK</a>
+            <a href="about.html">ABOUT</a>
+            <a href="contact.html">CONTACT</a>
+        </nav>
+    </header>
+
+    <main id="slide-container">
+        <!-- Slides will be injected dynamically via JavaScript -->
+    </main>
+
+    <div class="scroll-indicator" id="indicator-container">
+        <!-- Non-text indicator dots generated dynamically -->
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        const masterProjectCatalog = [
+            {
+                id: "5AFCwd9ylW8",
+                poster: "lilyratchet.jpeg",
+                year: "2026",
+                genre: "NARRATIVE",
+                title: "LILY RATCHET",
+                director: "DOM LOPEZ",
+                colors: ["#1A1A1A", "#4A5D23", "#8B4513", "#D3C5B4"]
+            },
+            {
+                id: "zbEuFbgax4I",
+                poster: "sisters.jpg",
+                year: "2025",
+                genre: "MUSIC VIDEO",
+                title: "SISTERS: LIBERTY",
+                director: "JAXON RAY",
+                colors: ["#0D1B2A", "#415A77", "#778DA9", "#E0E1DD"]
+            },
+            {
+                id: "bHKoN1Yk1xs",
+                poster: "slasher.jpg",
+                year: "2025",
+                genre: "NARRATIVE",
+                title: "SLASHER SLASHER",
+                director: "TAMRICK ELSE",
+                colors: ["#110505", "#5C1D1D", "#A83232", "#D1B894"]
+            },
+            {
+                id: "QMa25zeu9EQ",
+                poster: "abandominium.jpg",
+                year: "2025",
+                genre: "DOCUMENTARY",
+                title: "ABANDOMINIUM",
+                director: "DOM LOPEZ",
+                colors: ["#1A1C1E", "#38424B", "#62707D", "#9AA6B2"]
+            },
+            {
+                id: "fMV2PuvFwe8",
+                poster: "udrcabme.jpg",
+                year: "2025",
+                genre: "MUSIC VIDEO",
+                title: "UDONTRLLYCAREABME",
+                director: "HARI GANESH",
+                colors: ["#121212", "#3A3A3A", "#606060", "#B0B0B0"]
+            },
+            {
+                id: "O4FwI8Xm2t8",
+                poster: "worstfriend.jpg",
+                year: "2025",
+                genre: "MUSIC VIDEO",
+                title: "WORST FRIEND",
+                director: "DOM LOPEZ",
+                colors: ["#151515", "#332222", "#553333", "#C4B9A5"]
+            }
+        ];
+
+        const players = {};
+        let currentIndex = 0;
+        let isAnimating = false;
+
+        const mainContainer = document.getElementById('slide-container');
+        const indicatorContainer = document.getElementById('indicator-container');
+
+        function buildDeck() {
+            masterProjectCatalog.forEach((project, index) => {
+                const uniqueId = 'slide-player-' + index;
+
+                // Create Slide
+                const slide = document.createElement('div');
+                slide.className = `project-slide ${index === 0 ? 'active' : ''}`;
+                slide.setAttribute('data-index', index);
+
+                let swatchesHtml = '';
+                project.colors.forEach(hex => {
+                    swatchesHtml += `<div class="swatch" style="background: ${hex};"></div>`;
+                });
+
+                slide.innerHTML = `
+                    <div class="slide-frame">
+                        <div class="poster" style="background-image: url('${project.poster}');"></div>
+                        <div class="video-wrapper"><div id="${uniqueId}"></div></div>
+                        <div class="meta-overlay">
+                            <div class="meta-top">${project.year} // ${project.genre}</div>
+                            <div class="meta-bottom">
+                                <div>
+                                    <div class="meta-title">${project.title}</div>
+                                    <div class="meta-director">DIR. ${project.director}</div>
+                                </div>
+                                <div class="palette">
+                                    ${swatchesHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                mainContainer.appendChild(slide);
+
+                // Create Indicator Dot
+                const dot = document.createElement('div');
+                dot.className = `indicator-dot ${index === 0 ? 'active' : ''}`;
+                indicatorContainer.appendChild(dot);
+            });
+        }
+
+        function initPlayers() {
+            masterProjectCatalog.forEach((project, index) => {
+                const uniqueId = 'slide-player-' + index;
+                if (window.YT && window.YT.Player) {
+                    players[uniqueId] = new YT.Player(uniqueId, {
+                        videoId: project.id,
+                        playerVars: { 
+                            'autoplay': 0, 
+                            'controls': 0, 
+                            'mute': 1, 
+                            'rel': 0, 
+                            'showinfo': 0, 
+                            'modestbranding': 1, 
+                            'fs': 0, 
+                            'disablekb': 1, 
+                            'playsinline': 1,
+                            'origin': window.location.origin 
+                        },
+                        events: { 
+                            'onStateChange': (e) => { 
+                                if(e.data === YT.PlayerState.ENDED) e.target.playVideo(); 
+                                if(e.data === YT.PlayerState.PLAYING) e.target.setPlaybackQuality('hd1080');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        function goToSlide(newIndex) {
+            if (isAnimating || newIndex === currentIndex) return;
+            if (newIndex < 0 || newIndex >= masterProjectCatalog.length) return;
+
+            isAnimating = true;
+
+            // Pause current video
+            const oldPlayerId = 'slide-player-' + currentIndex;
+            if (players[oldPlayerId] && players[oldPlayerId].pauseVideo) {
+                players[oldPlayerId].pauseVideo();
+            }
+
+            const slides = document.querySelectorAll('.project-slide');
+            const dots = document.querySelectorAll('.indicator-dot');
+
+            slides[currentIndex].classList.remove('active');
+            dots[currentIndex].classList.remove('active');
+
+            currentIndex = newIndex;
+
+            slides[currentIndex].classList.add('active');
+            dots[currentIndex].classList.add('active');
+
+            // Play new video if hovered/active
+            const newPlayerId = 'slide-player-' + currentIndex;
+            const currentSlideElement = slides[currentIndex];
+            if (window.innerWidth > 900 && currentSlideElement.querySelector('.slide-frame:hover')) {
+                if (players[newPlayerId] && players[newPlayerId].playVideo) {
+                    players[newPlayerId].playVideo();
+                }
+            }
+
+            setTimeout(() => {
+                isAnimating = false;
+            }, 500); // Lockout duration for smooth snapping
+        }
+
+        // Wheel Scroll Listener
+        window.addEventListener('wheel', (e) => {
+            if (Math.abs(e.deltaY) < 30) return; // Prevent hyper-sensitive triggers
+            if (e.deltaY > 0) {
+                goToSlide(currentIndex + 1);
+            } else {
+                goToSlide(currentIndex - 1);
+            }
+        }, { passive: true });
+
+        // Touch / Swipe Support for Mobile
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            let touchEndY = e.changedTouches[0].clientY;
+            let diff = touchStartY - touchEndY;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    goToSlide(currentIndex + 1);
+                } else {
+                    goToSlide(currentIndex - 1);
+                }
+            }
+        }, { passive: true });
+
+        // Hover Play/Pause binding per slide
+        function bindHoverEvents() {
+            document.querySelectorAll('.slide-frame').forEach((frame, index) => {
+                const uniqueId = 'slide-player-' + index;
+                if (window.innerWidth > 900) {
+                    frame.addEventListener('mouseenter', () => {
+                        if (index === currentIndex && players[uniqueId] && players[uniqueId].playVideo) {
+                            players[uniqueId].playVideo();
+                        }
+                    });
+                    frame.addEventListener('mouseleave', () => {
+                        if (players[uniqueId] && players[uniqueId].pauseVideo) {
+                            players[uniqueId].pauseVideo();
+                        }
+                    });
+                }
+            });
+        }
+
+        function onYouTubeIframeAPIReady() {
+            buildDeck();
+            initPlayers();
+            bindHoverEvents();
+        }
+
+        // Fallback if API loads instantly
+        if (window.YT && window.YT.Player) {
+            buildDeck();
+            initPlayers();
+            bindHoverEvents();
+        } else {
+            // Build DOM even if API is pending
+            buildDeck();
+            bindHoverEvents();
+        }
+    </script>
+</body>
+</html>
