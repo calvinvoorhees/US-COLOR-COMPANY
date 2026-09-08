@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>US COLOR COMPANY</title>
     <style>
@@ -10,6 +10,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         html, body {
@@ -35,6 +36,7 @@
             align-items: center;
             background-color: rgba(245, 245, 245, 0.95);
             backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             padding: 24px 48px;
             border-bottom: 1px solid #000;
         }
@@ -96,6 +98,7 @@
             overflow-y: scroll;
             overflow-x: hidden;
             scroll-snap-type: y mandatory;
+            -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
             background-color: #F5F5F5;
         }
@@ -183,8 +186,15 @@
             pointer-events: none;
         }
 
-        .project-frame:hover .poster { opacity: 0; }
-        .project-frame:hover .meta-overlay { opacity: 1; }
+        /* Mobile fallback: Always show overlay or allow touch activation */
+        @media (hover: hover) {
+            .project-frame:hover .poster { opacity: 0; }
+            .project-frame:hover .meta-overlay { opacity: 1; }
+        }
+        @media (hover: none) {
+            .project-frame.touch-active .poster { opacity: 0; }
+            .project-frame.touch-active .meta-overlay { opacity: 1; }
+        }
 
         .meta-top {
             font-size: 11px;
@@ -224,7 +234,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* In-Fullscreen GUI Overlay Controls (Removed big pause button, kept Mute & Exit) */
+        /* In-Fullscreen GUI Overlay Controls */
         .fullscreen-gui {
             position: absolute;
             bottom: 32px;
@@ -267,11 +277,25 @@
         }
 
         @media (max-width: 768px) {
-            header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
-            .header-left img { height: 50px; }
+            header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 12px; 
+                padding: 16px 20px; 
+            }
+            .header-left img { height: 45px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
-            .project-row { padding-top: 130px; }
+            .header-nav a { padding: 8px 12px; font-size: 10px; }
+            .project-frame { width: 95vw; }
+            .project-row { padding-top: 115px; }
+            .meta-title { font-size: 20px; }
+            .meta-top { font-size: 9px; }
+            .meta-director { font-size: 11px; }
+            .swatch { width: 14px; height: 14px; }
+            .meta-overlay { padding: 20px; }
+            .fullscreen-gui { bottom: 20px; right: 20px; gap: 10px; }
+            .fs-control-btn { padding: 8px 16px; font-size: 10px; }
         }
     </style>
 </head>
@@ -449,7 +473,6 @@
                         },
                         events: { 
                             'onReady': (e) => {
-                                // Instantly trigger play for the first video on load
                                 if (index === 0) {
                                     e.target.playVideo();
                                     const poster = document.getElementById('poster-0');
@@ -482,6 +505,7 @@
                 const poster = document.getElementById('poster-' + index);
 
                 if (frame) {
+                    // Desktop hover
                     frame.addEventListener('mouseenter', () => {
                         const player = players[playerKey];
                         if (player && player.playVideo) {
@@ -503,13 +527,12 @@
                         }
                     });
 
-                    // Click logic: In fullscreen, clicking toggles pause/play. Outside fullscreen, goes fullscreen.
+                    // Mobile touch / Click handling
                     frame.addEventListener('click', (e) => {
                         if (e.target === muteBtn || e.target === exitBtn) return; 
 
                         const player = players[playerKey];
                         if (document.fullscreenElement === frame) {
-                            // Toggle play/pause when clicking video inside fullscreen mode
                             if (player && player.getPlayerState) {
                                 const state = player.getPlayerState();
                                 if (state === YT.PlayerState.PLAYING) {
@@ -519,7 +542,18 @@
                                 }
                             }
                         } else {
-                            // Enter fullscreen if not already
+                            // On touch devices, first tap reveals overlay/plays, second tap or fullscreen toggle goes fullscreen
+                            if (window.matchMedia("(hover: none)").matches && !frame.classList.contains('touch-active')) {
+                                document.querySelectorAll('.project-frame').forEach(f => f.classList.remove('touch-active'));
+                                frame.classList.add('touch-active');
+                                if (player && player.playVideo) {
+                                    player.mute();
+                                    player.playVideo();
+                                    if (poster) poster.style.opacity = '0';
+                                }
+                                return;
+                            }
+
                             if (frame.requestFullscreen) {
                                 frame.requestFullscreen();
                             } else if (frame.webkitRequestFullscreen) {
@@ -563,7 +597,6 @@
                 }
             });
 
-            // Reliable Class-based Fullscreen & Poster Sync Handler
             document.addEventListener('fullscreenchange', () => {
                 masterProjectCatalog.forEach((project, index) => {
                     const frame = document.getElementById('frame-' + index);
