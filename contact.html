@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CONTACT - US COLOR COMPANY</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background-color: #F5F5F5;
+            color: #000;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-transform: uppercase;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden; 
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Fixed Minimal Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(245, 245, 245, 0.95);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 24px 48px;
+            border-bottom: 1px solid #000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .header-left img {
+            height: 100px; 
+            width: auto;
+            display: block;
+        }
+
+        .company-name {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1;
+            color: #000;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .header-nav a {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            transition: all 0.2s ease;
+        }
+
+        .header-nav a.active {
+            background-color: #000;
+            color: #F5F5F5;
+        }
+
+        .header-nav a:hover {
+            background-color: #000;
+            color: #F5F5F5;
+        }
+
+        /* Contact Page Brutalist Layout */
+        main {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 148px; /* Offset for header */
+        }
+
+        .contact-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Significantly increased vertical space between the links */
+            gap: 8vh; 
+        }
+
+        .giant-link {
+            text-decoration: none;
+            color: #000;
+            font-size: 11vw; /* Fills the screen dynamically */
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            padding: 1vw 4vw; /* Added padding to create the box shape */
+            transition: background-color 0.15s ease, color 0.15s ease;
+            user-select: none; 
+        }
+
+        /* Solid block hover effect */
+        @media (hover: hover) {
+            .giant-link:hover {
+                background-color: #000;
+                color: #F5F5F5;
+            }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1200px) {
+            header { padding: 20px 24px; }
+            .header-left img { height: 70px; }
+            .company-name { font-size: 16px; }
+            .giant-link { font-size: 14vw; }
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
+            .header-left img { height: 45px; }
+            .company-name { font-size: 14px; }
+            .header-nav { width: 100%; justify-content: space-between; }
+            .header-nav a { padding: 8px 12px; font-size: 10px; }
+            
+            main { padding-top: 115px; }
+            .contact-menu { gap: 6vh; }
+            .giant-link { 
+                font-size: 16vw; 
+                letter-spacing: -2px; 
+                padding: 2vw 6vw;
+            }
+            
+            /* Give it the box effect when tapped on mobile */
+            .giant-link:active {
+                background-color: #000;
+                color: #F5F5F5;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="header-left">
+            <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
+            <div class="company-name">US COLOR COMPANY</div>
+        </a>
+        <nav class="header-nav">
+            <a href="index.html">WORK</a>
+            <a href="about.html">ABOUT</a>
+            <a href="contact.html" class="active">CONTACT</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="contact-menu">
+            <a href="mailto:uscolorcompany@gmail.com" class="giant-link">EMAIL</a>
+            <a href="https://instagram.com/uscolorcompany" target="_blank" rel="noopener noreferrer" class="giant-link">INSTAGRAM</a>
+        </div>
+    </main>
+
+</body>
+</html>
