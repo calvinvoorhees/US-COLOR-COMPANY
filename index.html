@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>US COLOR COMPANY</title>
+    
+    <!-- Browser Tab Icon (Favicon) -->
     <link rel="icon" type="image/png" href="uscolorcompanyLOGO.PNG">
+
     <style>
         * {
             box-sizing: border-box;
@@ -51,9 +54,10 @@
         }
 
         .header-left img {
-            height: 100px; 
+            height: 140px; 
             width: auto;
             display: block;
+            object-fit: contain;
         }
 
         .company-name {
@@ -78,11 +82,12 @@
             font-weight: 900;
             font-size: 11px;
             letter-spacing: 1.5px;
+            transition: all 0.2s ease;
         }
 
         .header-nav a.active {
-            color: #000;
-            background-color: transparent;
+            background-color: #000;
+            color: #F5F5F5;
         }
 
         .header-nav a:hover {
@@ -109,7 +114,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding-top: 148px; 
+            padding-top: 180px; 
             background-color: #F5F5F5;
             border-bottom: 1px solid #000;
             scroll-snap-align: start;
@@ -151,14 +156,13 @@
             background-color: #000;
         }
 
-        /* Safari Anti-Flash CSS Background Trick */
+        /* Video fades in on top of the wrapper's background image */
         .video-wrapper video { 
             width: 100%; height: 100%; 
             object-fit: cover;
             pointer-events: none; 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            opacity: 0; 
+            transition: opacity 0.4s ease;
         }
 
         .meta-overlay {
@@ -172,16 +176,9 @@
             padding: 32px;
             background: rgba(0,0,0,0.4);
             color: #FFF;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            opacity: 0; /* Handled dynamically by JS now */
+            transition: opacity 0.4s ease;
             pointer-events: none;
-        }
-
-        @media (hover: hover) {
-            .project-frame:hover .meta-overlay { opacity: 1; }
-        }
-        @media (hover: none) {
-            .project-frame.touch-active .meta-overlay { opacity: 1; }
         }
 
         .meta-top {
@@ -272,20 +269,20 @@
         /* Responsive Breakpoints */
         @media (max-width: 1200px) {
             header { padding: 20px 24px; }
-            .header-left img { height: 70px; }
+            .header-left img { height: 90px; }
             .company-name { font-size: 16px; }
             .project-frame { width: 92vw; }
-            .project-row { padding-top: 110px; }
+            .project-row { padding-top: 130px; }
         }
 
         @media (max-width: 768px) {
             header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
-            .header-left img { height: 45px; }
+            .header-left img { height: 60px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
             .header-nav a { padding: 8px 12px; font-size: 10px; }
             .project-frame { width: 95vw; }
-            .project-row { padding-top: 115px; }
+            .project-row { padding-top: 125px; }
             .meta-title { font-size: 20px; }
             .fullscreen-gui { bottom: 20px; right: 20px; gap: 10px; }
             .fs-control-btn { padding: 8px 16px; font-size: 10px; }
@@ -327,22 +324,22 @@
                 colors: ["#2B2A27", "#766C5B", "#A44A3F", "#E6D6C5"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/newshoes.mp4",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/sisters.mp4",
+                poster: "sisters.jpg",
+                year: "2025",
+                genre: "MUSIC VIDEO",
+                title: "SISTERS: LIBERTY",
+                director: "JAXON RAY",
+                colors: ["#0B1320", "#2F4858", "#86BBD8", "#F6F7F8"]
+            },
+            {
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/NewShoes.mp4",
                 poster: "newshoes.png",
                 year: "2026",
                 genre: "COMMERCIAL",
                 title: "NEW SHOES",
                 director: "MADDIE WHEATLEY",
                 colors: ["#151515", "#3A3A3A", "#888888", "#EFEFEF"]
-            },
-            {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/sisters.mp4",
-                poster: "sisters.jpg",
-                year: "2025",
-                genre: "MUSIC VIDEO",
-                title: "SISTERS: LIBERTY/CLIP",
-                director: "JAXON RAY",
-                colors: ["#0B1320", "#2F4858", "#86BBD8", "#F6F7F8"]
             },
             {
                 src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/lily.mp4",
@@ -403,7 +400,6 @@
                     if (!entry.isIntersecting) {
                         const index = entry.target.getAttribute('data-index');
                         const video = document.getElementById('video-' + index);
-                        
                         if (video && !video.paused) {
                             video.pause();
                         }
@@ -433,13 +429,15 @@
                             <button class="fs-control-btn mute-btn" id="mute-btn-${index}">UNMUTE</button>
                             <button class="fs-control-btn exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
                         </div>
-                        <div class="video-wrapper">
-                            <!-- Native poster attribute AND inline CSS background for instant Safari handoff -->
-                            <video id="video-${index}" poster="${project.poster}" style="background-image: url('${project.poster}');" muted loop playsinline preload="auto">
+                        
+                        <!-- Wrapper holds the thumbnail permanently to prevent Safari flashing -->
+                        <div class="video-wrapper" style="background-image: url('${project.poster}'); background-size: cover; background-position: center;">
+                            <video id="video-${index}" muted loop playsinline preload="auto">
                                 <source src="${project.src}" type="video/mp4">
                             </video>
                         </div>
-                        <div class="meta-overlay">
+                        
+                        <div class="meta-overlay" id="overlay-${index}">
                             <div class="meta-top">${project.year} // ${project.genre}</div>
                             <div class="meta-bottom">
                                 <div>
@@ -457,22 +455,60 @@
                 setTimeout(() => {
                     const frame = document.getElementById(`frame-${index}`);
                     const video = document.getElementById(`video-${index}`);
+                    const overlay = document.getElementById(`overlay-${index}`);
                     const muteBtn = document.getElementById(`mute-btn-${index}`);
                     const exitBtn = document.getElementById(`exit-btn-${index}`);
                     const mobileFsBtn = document.getElementById(`mobile-fs-${index}`);
 
-                    // DESKTOP: Hover to play instantly
+                    let hideOverlayTimer;
+
+                    const wakeOverlay = () => {
+                        overlay.style.opacity = '1';
+                        clearTimeout(hideOverlayTimer);
+                        
+                        // If video is playing, auto-hide the overlay after 2.5 seconds
+                        if (!video.paused && !document.fullscreenElement) {
+                            hideOverlayTimer = setTimeout(() => {
+                                overlay.style.opacity = '0';
+                            }, 2500);
+                        }
+                    };
+
+                    // Once the video actually starts rendering frames, fade it in smoothly over the thumbnail
+                    video.addEventListener('playing', () => {
+                        video.style.opacity = '1';
+                        wakeOverlay();
+                    });
+
+                    // When video is paused, immediately fade it out to show the thumbnail again
+                    video.addEventListener('pause', () => {
+                        if (!document.fullscreenElement) {
+                            video.style.opacity = '0';
+                        }
+                    });
+
+                    // DESKTOP: Hover to play and wake overlay
                     frame.addEventListener('mouseenter', () => {
                         if (!isMobile) {
                             if (!document.fullscreenElement) video.muted = true;
                             video.play().catch(() => {});
+                            wakeOverlay();
                         }
                     });
 
-                    // DESKTOP: Leave to pause
+                    // DESKTOP: Mouse movement wakes UI back up
+                    frame.addEventListener('mousemove', () => {
+                        if (!isMobile && !document.fullscreenElement) {
+                            wakeOverlay();
+                        }
+                    });
+
+                    // DESKTOP: Leave to pause instantly and hide UI
                     frame.addEventListener('mouseleave', () => {
                         if (!isMobile && !document.fullscreenElement) {
                             video.pause();
+                            clearTimeout(hideOverlayTimer);
+                            overlay.style.opacity = '0'; // Immediately hide overlay
                         }
                     });
 
@@ -494,6 +530,7 @@
                                 } else {
                                     video.pause();
                                 }
+                                wakeOverlay();
                             } else {
                                 if (frame.requestFullscreen) {
                                     frame.requestFullscreen().catch(() => {});
@@ -546,11 +583,13 @@
             document.querySelectorAll('.project-frame').forEach(frame => {
                 const video = frame.querySelector('video');
                 const muteBtn = frame.querySelector('.mute-btn');
+                const overlay = frame.querySelector('.meta-overlay');
 
                 if (document.fullscreenElement === frame) {
                     frame.classList.add('is-fullscreen');
                     video.muted = false;
                     video.play().catch(() => {});
+                    overlay.style.opacity = '0';
                     if (muteBtn) muteBtn.innerText = "MUTE";
                 } else {
                     frame.classList.remove('is-fullscreen');
