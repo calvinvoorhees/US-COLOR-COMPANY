@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABOUT - US COLOR COMPANY</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background-color: #F5F5F5;
+            color: #000;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-transform: uppercase;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            width: 100vw;
+            min-height: 100vh;
+        }
+
+        /* Fixed Minimal Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(245, 245, 245, 0.95);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 24px 48px;
+            border-bottom: 1px solid #000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .header-left img {
+            height: 100px; 
+            width: auto;
+            display: block;
+        }
+
+        .company-name {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1;
+            color: #000;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .header-nav a {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            transition: all 0.2s ease;
+        }
+
+        .header-nav a.active {
+            background-color: #000;
+            color: #F5F5F5;
+        }
+
+        .header-nav a:hover {
+            background-color: #000;
+            color: #F5F5F5;
+        }
+
+        /* About Page Grid & Editorial Layout */
+        main {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 200px;
+            padding-bottom: 96px;
+        }
+
+        .about-container {
+            width: 80vw;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 64px;
+            border-top: 1px solid #000;
+            padding-top: 48px;
+        }
+
+        /* Primary Content Section */
+        .bio-section {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .statement {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            color: #000;
+        }
+
+        .body-copy {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            line-height: 1.8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            text-transform: none;
+        }
+
+        /* Sidebar / Specs Section */
+        .specs-section {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            border-left: 1px solid #000;
+            padding-left: 48px;
+        }
+
+        .spec-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .spec-label {
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            color: #888;
+        }
+
+        .spec-value {
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: #000;
+            line-height: 1.4;
+        }
+
+        /* Responsive Settings */
+        @media (max-width: 1200px) {
+            header { padding: 20px 24px; }
+            .header-left img { height: 70px; }
+            .company-name { font-size: 16px; }
+            .about-container { width: 92vw; gap: 48px; }
+            .statement { font-size: 24px; }
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
+            .header-left img { height: 45px; }
+            .company-name { font-size: 14px; }
+            .header-nav { width: 100%; justify-content: space-between; }
+            .header-nav a { padding: 8px 12px; font-size: 10px; }
+            
+            main { padding-top: 140px; padding-bottom: 48px; }
+            .about-container { 
+                width: 95vw; 
+                grid-template-columns: 1fr; 
+                gap: 48px; 
+            }
+            .statement { font-size: 20px; }
+            .specs-section { 
+                border-left: none; 
+                border-top: 1px solid #000; 
+                padding-left: 0; 
+                padding-top: 32px; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="header-left">
+            <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
+            <div class="company-name">US COLOR COMPANY</div>
+        </a>
+        <nav class="header-nav">
+            <a href="index.html">WORK</a>
+            <a href="about.html" class="active">ABOUT</a>
+            <a href="contact.html">CONTACT</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="about-container">
+            <!-- Left Column: Mission & Bio -->
+            <div class="bio-section">
+                <h1 class="statement">
+                    LOREM IPSUM DOLOR SIT AMET CONSECTETUR ADIPISCING ELIT SED DO EIUSMOD TEMPOR.
+                </h1>
+                <div class="body-copy">
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.
+                    </p>
+                    <p>
+                        Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Column: Services & Specs -->
+            <div class="specs-section">
+                <div class="spec-block">
+                    <span class="spec-label">SERVICES</span>
+                    <span class="spec-value">COLOR GRADING<br>LIVE GRADING<br>REMOTE SESSIONS<br>SHOWLUT CREATION<br>LOOK DEVELOPMENT</span>
+                </div>
+
+                <div class="spec-block">
+                    <span class="spec-label">LOCATION</span>
+                    <span class="spec-value">UNITED STATES</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
