@@ -142,16 +142,6 @@
             display: none !important;
         }
 
-        .poster { 
-            position: absolute; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background-size: cover; 
-            background-position: center; 
-            z-index: 10; 
-            transition: opacity 0.3s ease; 
-        }
-
         .video-wrapper { 
             position: absolute; 
             top: 0; left: 0; 
@@ -160,10 +150,14 @@
             background-color: #000;
         }
 
+        /* Safari Anti-Flash CSS Background Trick */
         .video-wrapper video { 
             width: 100%; height: 100%; 
             object-fit: cover;
             pointer-events: none; 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .meta-overlay {
@@ -295,7 +289,6 @@
             .fullscreen-gui { bottom: 20px; right: 20px; gap: 10px; }
             .fs-control-btn { padding: 8px 16px; font-size: 10px; }
             
-            /* Drastically shrink palette for mobile */
             .palette { gap: 4px; }
             .swatch { width: 10px; height: 10px; border-width: 0.5px; }
             
@@ -346,7 +339,7 @@
                 poster: "sisters.jpg",
                 year: "2025",
                 genre: "MUSIC VIDEO",
-                title: "SISTERS: LIBERTY/CLIP",
+                title: "SISTERS: LIBERTY",
                 director: "JAXON RAY",
                 colors: ["#0B1320", "#2F4858", "#86BBD8", "#F6F7F8"]
             },
@@ -409,11 +402,9 @@
                     if (!entry.isIntersecting) {
                         const index = entry.target.getAttribute('data-index');
                         const video = document.getElementById('video-' + index);
-                        const poster = document.getElementById('poster-' + index);
                         
                         if (video && !video.paused) {
                             video.pause();
-                            if (poster) poster.style.opacity = '1';
                         }
                     }
                 });
@@ -441,9 +432,11 @@
                             <button class="fs-control-btn mute-btn" id="mute-btn-${index}">UNMUTE</button>
                             <button class="fs-control-btn exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
                         </div>
-                        <div class="poster" id="poster-${index}" style="background-image: url('${project.poster}');"></div>
                         <div class="video-wrapper">
-                            <video id="video-${index}" src="${project.src}" muted loop playsinline preload="metadata"></video>
+                            <!-- Native poster attribute AND inline CSS background for instant Safari handoff -->
+                            <video id="video-${index}" poster="${project.poster}" style="background-image: url('${project.poster}');" muted loop playsinline preload="auto">
+                                <source src="${project.src}" type="video/mp4">
+                            </video>
                         </div>
                         <div class="meta-overlay">
                             <div class="meta-top">${project.year} // ${project.genre}</div>
@@ -465,15 +458,13 @@
                     const video = document.getElementById(`video-${index}`);
                     const muteBtn = document.getElementById(`mute-btn-${index}`);
                     const exitBtn = document.getElementById(`exit-btn-${index}`);
-                    const poster = document.getElementById(`poster-${index}`);
                     const mobileFsBtn = document.getElementById(`mobile-fs-${index}`);
 
-                    // DESKTOP: Hover to play (muted)
+                    // DESKTOP: Hover to play instantly
                     frame.addEventListener('mouseenter', () => {
                         if (!isMobile) {
                             if (!document.fullscreenElement) video.muted = true;
                             video.play().catch(() => {});
-                            if (poster) poster.style.opacity = '0';
                         }
                     });
 
@@ -481,7 +472,6 @@
                     frame.addEventListener('mouseleave', () => {
                         if (!isMobile && !document.fullscreenElement) {
                             video.pause();
-                            if (poster) poster.style.opacity = '1';
                         }
                     });
 
@@ -500,7 +490,6 @@
                                 if (video.paused) {
                                     video.muted = true;
                                     video.play().catch(() => {});
-                                    if (poster) poster.style.opacity = '0';
                                 } else {
                                     video.pause();
                                 }
@@ -519,10 +508,10 @@
                         mobileFsBtn.addEventListener('click', (e) => {
                             e.stopPropagation();
                             
-                            // iPhones block standard div fullscreen, they require video.webkitEnterFullscreen
                             if (video.webkitEnterFullscreen) {
-                                video.muted = false; // Usually want audio natively
+                                video.muted = false; 
                                 video.webkitEnterFullscreen();
+                                video.play().catch(() => {});
                             } else if (frame.requestFullscreen) {
                                 frame.requestFullscreen().catch(() => {});
                             } else if (frame.webkitRequestFullscreen) {
@@ -551,23 +540,21 @@
             setTimeout(() => { isFetching = false; }, 400);
         }
 
+        // Fullscreen synchronization
         document.addEventListener('fullscreenchange', () => {
             document.querySelectorAll('.project-frame').forEach(frame => {
                 const video = frame.querySelector('video');
                 const muteBtn = frame.querySelector('.mute-btn');
-                const poster = frame.querySelector('.poster');
 
                 if (document.fullscreenElement === frame) {
                     frame.classList.add('is-fullscreen');
                     video.muted = false;
                     video.play().catch(() => {});
-                    if (poster) poster.style.opacity = '0';
                     if (muteBtn) muteBtn.innerText = "MUTE";
                 } else {
                     frame.classList.remove('is-fullscreen');
                     video.muted = true;
                     video.pause();
-                    if (poster) poster.style.opacity = '1';
                     if (muteBtn) muteBtn.innerText = "UNMUTE";
                 }
             });
