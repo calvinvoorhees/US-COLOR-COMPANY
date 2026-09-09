@@ -77,7 +77,6 @@
             font-weight: 900;
             font-size: 11px;
             letter-spacing: 1.5px;
-            transition: background-color 0s, color 0s;
         }
 
         .header-nav a.active {
@@ -123,7 +122,7 @@
             aspect-ratio: 16 / 9;
             background-color: #F5F5F5;
             overflow: hidden;
-            cursor: default;
+            cursor: pointer; /* Suggests interactivity */
         }
 
         .project-frame.is-fullscreen {
@@ -135,9 +134,11 @@
             top: 0 !important;
             left: 0 !important;
             z-index: 2147483640;
+            cursor: default;
         }
 
-        .project-frame.is-fullscreen .palette {
+        .project-frame.is-fullscreen .palette,
+        .project-frame.is-fullscreen .mobile-fs-btn {
             display: none !important;
         }
 
@@ -156,13 +157,13 @@
             top: 0; left: 0; 
             width: 100%; height: 100%; 
             z-index: 5; 
-            background-color: inherit;
+            background-color: #000;
         }
 
-        .video-wrapper iframe { 
+        .video-wrapper video { 
             width: 100%; height: 100%; 
-            pointer-events: auto; 
-            transform: scale(1.35); 
+            object-fit: cover;
+            pointer-events: none; /* Let clicks pass to the frame */
         }
 
         .meta-overlay {
@@ -181,12 +182,12 @@
             pointer-events: none;
         }
 
+        /* Hover reveals meta overlay on desktop */
         @media (hover: hover) {
-            .project-frame:hover .poster { opacity: 0; }
             .project-frame:hover .meta-overlay { opacity: 1; }
         }
+        /* Mobile touch keeps overlay visible when active */
         @media (hover: none) {
-            .project-frame.touch-active .poster { opacity: 0; }
             .project-frame.touch-active .meta-overlay { opacity: 1; }
         }
 
@@ -228,6 +229,23 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
+        /* Mobile specific fullscreen button (hidden on desktop) */
+        .mobile-fs-btn {
+            display: none;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.7);
+            color: #FFF;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+
+        /* In-Fullscreen GUI Overlay Controls */
         .fullscreen-gui {
             position: absolute;
             bottom: 32px;
@@ -260,7 +278,7 @@
             color: #000;
         }
 
-        /* Responsive */
+        /* Responsive Breakpoints */
         @media (max-width: 1200px) {
             header { padding: 20px 24px; }
             .header-left img { height: 70px; }
@@ -270,12 +288,7 @@
         }
 
         @media (max-width: 768px) {
-            header { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 12px; 
-                padding: 16px 20px; 
-            }
+            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
             .header-left img { height: 45px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
@@ -283,12 +296,11 @@
             .project-frame { width: 95vw; }
             .project-row { padding-top: 115px; }
             .meta-title { font-size: 20px; }
-            .meta-top { font-size: 9px; }
-            .meta-director { font-size: 11px; }
-            .swatch { width: 14px; height: 14px; }
-            .meta-overlay { padding: 20px; }
             .fullscreen-gui { bottom: 20px; right: 20px; gap: 10px; }
             .fs-control-btn { padding: 8px 16px; font-size: 10px; }
+            
+            /* Show Mobile Fullscreen Button on touch devices */
+            .mobile-fs-btn { display: inline-block; }
         }
     </style>
 </head>
@@ -307,14 +319,13 @@
     </header>
 
     <main id="feed-container">
-        <!-- Rows injected via JS -->
+        <!-- Rows injected dynamically -->
     </main>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         const masterProjectCatalog = [
             {
-                id: "MJjYElYwSnQ",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/worstfriend.mp4",
                 poster: "worstfriend.jpg",
                 year: "2026",
                 genre: "MUSIC VIDEO",
@@ -323,7 +334,7 @@
                 colors: ["#2B2A27", "#766C5B", "#A44A3F", "#E6D6C5"]
             },
             {
-                id: "zbEuFbgax4I",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/sisters.mp4",
                 poster: "sisters.jpg",
                 year: "2025",
                 genre: "MUSIC VIDEO",
@@ -332,7 +343,7 @@
                 colors: ["#0B1320", "#2F4858", "#86BBD8", "#F6F7F8"]
             },
             {
-                id: "5AFCwd9ylW8",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/lily.mp4",
                 poster: "lilyratchet.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -341,7 +352,7 @@
                 colors: ["#1C1E18", "#4A5240", "#D3A052", "#E8E9E1"]
             },
             {
-                id: "n1TBUxlOryY",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/pygmy.mp4",
                 poster: "Pygmy.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -350,7 +361,7 @@
                 colors: ["#0D0F12", "#2B3A42", "#8D99AE", "#EF233C"]
             },
             {
-                id: "EAJ0jstt1n4",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/unleavened.mp4",
                 poster: "unleavened.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -359,7 +370,7 @@
                 colors: ["#1F1A17", "#5E4A3D", "#A68065", "#EADDCD"]
             },
             {
-                id: "w2CBEvLpNAE",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/boring.mp4",
                 poster: "boring.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -368,34 +379,7 @@
                 colors: ["#181818", "#4A4A4A", "#9CA3AF", "#F3F4F6"]
             },
             {
-                id: "dd3SpVXwUWY",
-                poster: "ButWhatIf.jpeg",
-                year: "2026",
-                genre: "NARRATIVE",
-                title: "BUT WHAT IF",
-                director: "JAMES STEICHEN",
-                colors: ["#0A0910", "#3F376B", "#7A709E", "#D8B4E2"]
-            },
-            {
-                id: "bHKoN1Yk1xs",
-                poster: "slasher.jpg",
-                year: "2025",
-                genre: "NARRATIVE",
-                title: "SLASHER SLASHER",
-                director: "TAMRICK ELSE",
-                colors: ["#000000", "#3E0C0C", "#8B0000", "#D9C5B2"]
-            },
-            {
-                id: "QMa25zeu9EQ",
-                poster: "abandominium.jpg",
-                year: "2025",
-                genre: "NARRATIVE",
-                title: "ABANDOMINIUM",
-                director: "DOM LOPEZ",
-                colors: ["#1A1C1E", "#3E463F", "#707A71", "#C2C6C2"]
-            },
-            {
-                id: "fMV2PuvFwe8",
+                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/udontrllycareabme.mp4",
                 poster: "udrcabme.jpg",
                 year: "2025",
                 genre: "MUSIC VIDEO",
@@ -405,38 +389,28 @@
             }
         ];
 
-        const players = {};
         const feedContainer = document.getElementById('feed-container');
         let globalIndex = 0;
         let observer;
         let isFetching = false;
+        const isMobile = window.matchMedia("(hover: none)").matches;
 
-        function initGlobalObserver() {
-            const observerOptions = {
-                root: feedContainer,
-                threshold: 0.5 
-            };
-
+        // Observer now strictly manages pausing off-screen videos to save memory
+        function initObserver() {
             observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    const index = entry.target.getAttribute('data-index');
-                    const playerKey = 'yt-player-' + index;
-                    const player = players[playerKey];
-                    const poster = document.getElementById('poster-' + index);
-
-                    if (entry.isIntersecting) {
-                        if (poster) poster.style.opacity = '0';
-                        if (player && player.playVideo) {
-                            player.playVideo();
-                        }
-                    } else {
-                        if (poster) poster.style.opacity = '1';
-                        if (player && player.pauseVideo) {
-                            player.pauseVideo();
+                    if (!entry.isIntersecting) {
+                        const index = entry.target.getAttribute('data-index');
+                        const video = document.getElementById('video-' + index);
+                        const poster = document.getElementById('poster-' + index);
+                        
+                        if (video && !video.paused) {
+                            video.pause();
+                            if (poster) poster.style.opacity = '1';
                         }
                     }
                 });
-            }, observerOptions);
+            }, { root: feedContainer, threshold: 0.1 });
         }
 
         function appendBatch() {
@@ -445,7 +419,6 @@
 
             masterProjectCatalog.forEach((project) => {
                 const index = globalIndex;
-                const uniqueId = 'yt-player-' + index;
                 const row = document.createElement('div');
                 row.className = 'project-row';
                 row.setAttribute('data-index', index);
@@ -458,204 +431,148 @@
                 row.innerHTML = `
                     <div class="project-frame" id="frame-${index}">
                         <div class="fullscreen-gui">
-                            <button class="fs-control-btn" id="mute-btn-${index}">UNMUTE</button>
-                            <button class="fs-control-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
+                            <button class="fs-control-btn mute-btn" id="mute-btn-${index}">UNMUTE</button>
+                            <button class="fs-control-btn exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
                         </div>
                         <div class="poster" id="poster-${index}" style="background-image: url('${project.poster}');"></div>
-                        <div class="video-wrapper"><div id="${uniqueId}"></div></div>
+                        <div class="video-wrapper">
+                            <video id="video-${index}" src="${project.src}" muted loop playsinline preload="metadata"></video>
+                        </div>
                         <div class="meta-overlay">
                             <div class="meta-top">${project.year} // ${project.genre}</div>
                             <div class="meta-bottom">
                                 <div>
                                     <div class="meta-title">${project.title}</div>
                                     <div class="meta-director">DIR. ${project.director}</div>
+                                    <button class="mobile-fs-btn" id="mobile-fs-${index}">FULLSCREEN</button>
                                 </div>
-                                <div class="palette">
-                                    ${swatchesHtml}
-                                </div>
+                                <div class="palette">${swatchesHtml}</div>
                             </div>
                         </div>
                     </div>
                 `;
                 feedContainer.appendChild(row);
 
-                if (window.YT && window.YT.Player) {
-                    players[uniqueId] = new YT.Player(uniqueId, {
-                        videoId: project.id,
-                        playerVars: { 
-                            'autoplay': 0, 
-                            'controls': 1, 
-                            'mute': 1, 
-                            'rel': 0, 
-                            'showinfo': 0, 
-                            'modestbranding': 1, 
-                            'fs': 1, 
-                            'disablekb': 0, 
-                            'playsinline': 1,
-                            'origin': window.location.origin 
-                        },
-                        events: { 
-                            'onReady': (e) => {
-                                if (index === 0) {
-                                    e.target.playVideo();
-                                    const poster = document.getElementById('poster-0');
+                setTimeout(() => {
+                    const frame = document.getElementById(`frame-${index}`);
+                    const video = document.getElementById(`video-${index}`);
+                    const muteBtn = document.getElementById(`mute-btn-${index}`);
+                    const exitBtn = document.getElementById(`exit-btn-${index}`);
+                    const poster = document.getElementById(`poster-${index}`);
+                    const mobileFsBtn = document.getElementById(`mobile-fs-${index}`);
+
+                    // DESKTOP: Hover to play (muted)
+                    frame.addEventListener('mouseenter', () => {
+                        if (!isMobile) {
+                            if (!document.fullscreenElement) video.muted = true;
+                            video.play().catch(() => {});
+                            if (poster) poster.style.opacity = '0';
+                        }
+                    });
+
+                    // DESKTOP: Leave to pause
+                    frame.addEventListener('mouseleave', () => {
+                        if (!isMobile && !document.fullscreenElement) {
+                            video.pause();
+                            if (poster) poster.style.opacity = '1';
+                        }
+                    });
+
+                    // CLICK INTERACTION (Mobile & Desktop)
+                    frame.addEventListener('click', (e) => {
+                        // Prevent click action if tapping a button
+                        if (e.target.tagName === 'BUTTON') return;
+
+                        if (document.fullscreenElement === frame) {
+                            // In fullscreen, tapping toggles play/pause
+                            if (video.paused) video.play();
+                            else video.pause();
+                        } else {
+                            if (isMobile) {
+                                // MOBILE: Tap thumbnail to play inline (muted)
+                                document.querySelectorAll('.project-frame').forEach(f => f.classList.remove('touch-active'));
+                                frame.classList.add('touch-active');
+                                
+                                if (video.paused) {
+                                    video.muted = true;
+                                    video.play().catch(() => {});
                                     if (poster) poster.style.opacity = '0';
+                                } else {
+                                    video.pause();
                                 }
-                            },
-                            'onStateChange': (e) => { 
-                                if(e.data === YT.PlayerState.ENDED) e.target.playVideo(); 
-                                if(e.data === YT.PlayerState.PLAYING) {
-                                    e.target.setPlaybackQuality('hd1080');
-                                    const frame = document.getElementById('frame-' + index);
-                                    if (frame && !frame.classList.contains('is-fullscreen')) {
-                                        e.target.mute();
-                                    }
-                                }
+                            } else {
+                                // DESKTOP: Click frame to go fullscreen
+                                frame.requestFullscreen().catch(() => {});
                             }
                         }
                     });
-                }
 
-                // Bind interactions after element is injected
-                setTimeout(() => {
-                    const frame = document.getElementById('frame-' + index);
-                    const muteBtn = document.getElementById('mute-btn-' + index);
-                    const exitBtn = document.getElementById('exit-btn-' + index);
-                    const poster = document.getElementById('poster-' + index);
-
-                    if (frame) {
-                        frame.addEventListener('mouseenter', () => {
-                            const player = players[uniqueId];
-                            if (player && player.playVideo) {
-                                if (!document.fullscreenElement) player.mute(); 
-                                player.playVideo();
-                                if (poster) poster.style.opacity = '0';
-                            }
+                    // MOBILE SPECIFIC: Fullscreen Button Overlay
+                    if (mobileFsBtn) {
+                        mobileFsBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            frame.requestFullscreen().catch(() => {});
                         });
-
-                        frame.addEventListener('mouseleave', () => {
-                            if (document.fullscreenElement) return;
-                            const player = players[uniqueId];
-                            if (player && player.pauseVideo) {
-                                player.pauseVideo();
-                                if (poster) poster.style.opacity = '1';
-                            }
-                        });
-
-                        frame.addEventListener('click', (e) => {
-                            if (e.target === muteBtn || e.target === exitBtn) return; 
-
-                            const player = players[uniqueId];
-                            if (document.fullscreenElement === frame) {
-                                if (player && player.getPlayerState) {
-                                    const state = player.getPlayerState();
-                                    if (state === YT.PlayerState.PLAYING) {
-                                        player.pauseVideo();
-                                    } else {
-                                        player.playVideo();
-                                    }
-                                }
-                            } else {
-                                if (window.matchMedia("(hover: none)").matches && !frame.classList.contains('touch-active')) {
-                                    document.querySelectorAll('.project-frame').forEach(f => f.classList.remove('touch-active'));
-                                    frame.classList.add('touch-active');
-                                    if (player && player.playVideo) {
-                                        player.mute();
-                                        player.playVideo();
-                                        if (poster) poster.style.opacity = '0';
-                                    }
-                                    return;
-                                }
-
-                                if (frame.requestFullscreen) {
-                                    frame.requestFullscreen();
-                                } else if (frame.webkitRequestFullscreen) {
-                                    frame.webkitRequestFullscreen();
-                                } else if (frame.msRequestFullscreen) {
-                                    frame.msRequestFullscreen();
-                                }
-                            }
-                        });
-
-                        if (muteBtn) {
-                            muteBtn.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                const player = players[uniqueId];
-                                if (player) {
-                                    if (player.isMuted()) {
-                                        player.unMute();
-                                        muteBtn.innerText = "MUTE";
-                                    } else {
-                                        player.mute();
-                                        muteBtn.innerText = "UNMUTE";
-                                    }
-                                }
-                            });
-                        }
-
-                        if (exitBtn) {
-                            exitBtn.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                if (document.fullscreenElement) {
-                                    if (document.exitFullscreen) {
-                                        document.exitFullscreen();
-                                    } else if (document.webkitExitFullscreen) {
-                                        document.webkitExitFullscreen();
-                                    } else if (document.msExitFullscreen) {
-                                        document.msExitFullscreen();
-                                    }
-                                }
-                            });
-                        }
                     }
+
+                    // GUI: Mute Toggle
+                    muteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        video.muted = !video.muted;
+                        muteBtn.innerText = video.muted ? "UNMUTE" : "MUTE";
+                    });
+
+                    // GUI: Exit Fullscreen
+                    exitBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (document.fullscreenElement) document.exitFullscreen();
+                    });
+
                     observer.observe(row);
                 }, 50);
 
                 globalIndex++;
             });
 
-            setTimeout(() => { isFetching = false; }, 500);
+            setTimeout(() => { isFetching = false; }, 400);
         }
 
-        // Handle dynamic fullscreen class toggling efficiently across infinite DOM
+        // Fullscreen synchronization (Applies to Desktop and Mobile)
         document.addEventListener('fullscreenchange', () => {
-            document.querySelectorAll('.project-frame.is-fullscreen').forEach(frame => {
-                if (frame !== document.fullscreenElement) {
+            document.querySelectorAll('.project-frame').forEach(frame => {
+                const video = frame.querySelector('video');
+                const muteBtn = frame.querySelector('.mute-btn');
+                const poster = frame.querySelector('.poster');
+
+                if (document.fullscreenElement === frame) {
+                    // Enter fullscreen: Unmute, ensure playing
+                    frame.classList.add('is-fullscreen');
+                    video.muted = false;
+                    video.play().catch(() => {});
+                    if (poster) poster.style.opacity = '0';
+                    if (muteBtn) muteBtn.innerText = "MUTE";
+                } else {
+                    // Exit fullscreen: Mute, pause video, restore poster
                     frame.classList.remove('is-fullscreen');
-                    const index = frame.getAttribute('id').replace('frame-', '');
-                    const player = players['yt-player-' + index];
-                    const muteBtn = document.getElementById('mute-btn-' + index);
-                    if (player) {
-                        player.mute();
-                        if (muteBtn) muteBtn.innerText = "UNMUTE";
-                    }
+                    video.muted = true;
+                    video.pause();
+                    if (poster) poster.style.opacity = '1';
+                    if (muteBtn) muteBtn.innerText = "UNMUTE";
                 }
             });
-
-            const fsFrame = document.fullscreenElement;
-            if (fsFrame && fsFrame.classList.contains('project-frame')) {
-                fsFrame.classList.add('is-fullscreen');
-                const index = fsFrame.getAttribute('id').replace('frame-', '');
-                const player = players['yt-player-' + index];
-                const muteBtn = document.getElementById('mute-btn-' + index);
-                if (player) {
-                    player.unMute();
-                    if (muteBtn) muteBtn.innerText = "MUTE";
-                }
-            }
         });
 
-        function onYouTubeIframeAPIReady() {
-            initGlobalObserver();
+        // Initialize infinite scroll feed
+        window.addEventListener('DOMContentLoaded', () => {
+            initObserver();
             appendBatch();
-            
+
             feedContainer.addEventListener('scroll', () => {
-                // If user scrolls within 2 viewport heights of the bottom, load more
                 if (feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - (window.innerHeight * 2)) {
                     appendBatch();
                 }
             });
-        }
+        });
     </script>
 </body>
 </html>
