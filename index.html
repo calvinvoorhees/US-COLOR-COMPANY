@@ -41,7 +41,6 @@
             border-bottom: 1px solid #000;
         }
 
-        /* Logo Link */
         .header-left {
             display: flex;
             align-items: center;
@@ -103,7 +102,6 @@
             background-color: #F5F5F5;
         }
 
-        /* Perfect Vertical Centering accounting for Header */
         .project-row {
             position: relative;
             width: 100vw;
@@ -128,7 +126,6 @@
             cursor: default;
         }
 
-        /* Fullscreen Styling */
         .project-frame.is-fullscreen {
             background-color: #000 !important;
             width: 100vw !important;
@@ -140,7 +137,6 @@
             z-index: 2147483640;
         }
 
-        /* Hide color palette when fullscreen */
         .project-frame.is-fullscreen .palette {
             display: none !important;
         }
@@ -169,7 +165,6 @@
             transform: scale(1.35); 
         }
 
-        /* Hover Overlay */
         .meta-overlay {
             position: absolute;
             top: 0; left: 0;
@@ -186,7 +181,6 @@
             pointer-events: none;
         }
 
-        /* Mobile fallback: Always show overlay or allow touch activation */
         @media (hover: hover) {
             .project-frame:hover .poster { opacity: 0; }
             .project-frame:hover .meta-overlay { opacity: 1; }
@@ -234,7 +228,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* In-Fullscreen GUI Overlay Controls */
         .fullscreen-gui {
             position: absolute;
             bottom: 32px;
@@ -369,7 +362,7 @@
                 id: "w2CBEvLpNAE",
                 poster: "boring.jpeg",
                 year: "2026",
-                genre: "COMMERCIAL",
+                genre: "NARRATIVE",
                 title: "BORING",
                 director: "CALEB ARGUETA",
                 colors: ["#181818", "#4A4A4A", "#9CA3AF", "#F3F4F6"]
@@ -396,7 +389,7 @@
                 id: "QMa25zeu9EQ",
                 poster: "abandominium.jpg",
                 year: "2025",
-                genre: "DOCUMENTARY",
+                genre: "NARRATIVE",
                 title: "ABANDOMINIUM",
                 director: "DOM LOPEZ",
                 colors: ["#1A1C1E", "#3E463F", "#707A71", "#C2C6C2"]
@@ -414,9 +407,44 @@
 
         const players = {};
         const feedContainer = document.getElementById('feed-container');
+        let globalIndex = 0;
+        let observer;
+        let isFetching = false;
 
-        function buildFeed() {
-            masterProjectCatalog.forEach((project, index) => {
+        function initGlobalObserver() {
+            const observerOptions = {
+                root: feedContainer,
+                threshold: 0.5 
+            };
+
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const index = entry.target.getAttribute('data-index');
+                    const playerKey = 'yt-player-' + index;
+                    const player = players[playerKey];
+                    const poster = document.getElementById('poster-' + index);
+
+                    if (entry.isIntersecting) {
+                        if (poster) poster.style.opacity = '0';
+                        if (player && player.playVideo) {
+                            player.playVideo();
+                        }
+                    } else {
+                        if (poster) poster.style.opacity = '1';
+                        if (player && player.pauseVideo) {
+                            player.pauseVideo();
+                        }
+                    }
+                });
+            }, observerOptions);
+        }
+
+        function appendBatch() {
+            if (isFetching) return;
+            isFetching = true;
+
+            masterProjectCatalog.forEach((project) => {
+                const index = globalIndex;
                 const uniqueId = 'yt-player-' + index;
                 const row = document.createElement('div');
                 row.className = 'project-row';
@@ -450,12 +478,7 @@
                     </div>
                 `;
                 feedContainer.appendChild(row);
-            });
-        }
 
-        function initPlayers() {
-            masterProjectCatalog.forEach((project, index) => {
-                const uniqueId = 'yt-player-' + index;
                 if (window.YT && window.YT.Player) {
                     players[uniqueId] = new YT.Player(uniqueId, {
                         videoId: project.id,
@@ -483,9 +506,8 @@
                                 if(e.data === YT.PlayerState.ENDED) e.target.playVideo(); 
                                 if(e.data === YT.PlayerState.PLAYING) {
                                     e.target.setPlaybackQuality('hd1080');
-                                    
                                     const frame = document.getElementById('frame-' + index);
-                                    if (!frame.classList.contains('is-fullscreen')) {
+                                    if (frame && !frame.classList.contains('is-fullscreen')) {
                                         e.target.mute();
                                     }
                                 }
@@ -493,187 +515,146 @@
                         }
                     });
                 }
+
+                // Bind interactions after element is injected
+                setTimeout(() => {
+                    const frame = document.getElementById('frame-' + index);
+                    const muteBtn = document.getElementById('mute-btn-' + index);
+                    const exitBtn = document.getElementById('exit-btn-' + index);
+                    const poster = document.getElementById('poster-' + index);
+
+                    if (frame) {
+                        frame.addEventListener('mouseenter', () => {
+                            const player = players[uniqueId];
+                            if (player && player.playVideo) {
+                                if (!document.fullscreenElement) player.mute(); 
+                                player.playVideo();
+                                if (poster) poster.style.opacity = '0';
+                            }
+                        });
+
+                        frame.addEventListener('mouseleave', () => {
+                            if (document.fullscreenElement) return;
+                            const player = players[uniqueId];
+                            if (player && player.pauseVideo) {
+                                player.pauseVideo();
+                                if (poster) poster.style.opacity = '1';
+                            }
+                        });
+
+                        frame.addEventListener('click', (e) => {
+                            if (e.target === muteBtn || e.target === exitBtn) return; 
+
+                            const player = players[uniqueId];
+                            if (document.fullscreenElement === frame) {
+                                if (player && player.getPlayerState) {
+                                    const state = player.getPlayerState();
+                                    if (state === YT.PlayerState.PLAYING) {
+                                        player.pauseVideo();
+                                    } else {
+                                        player.playVideo();
+                                    }
+                                }
+                            } else {
+                                if (window.matchMedia("(hover: none)").matches && !frame.classList.contains('touch-active')) {
+                                    document.querySelectorAll('.project-frame').forEach(f => f.classList.remove('touch-active'));
+                                    frame.classList.add('touch-active');
+                                    if (player && player.playVideo) {
+                                        player.mute();
+                                        player.playVideo();
+                                        if (poster) poster.style.opacity = '0';
+                                    }
+                                    return;
+                                }
+
+                                if (frame.requestFullscreen) {
+                                    frame.requestFullscreen();
+                                } else if (frame.webkitRequestFullscreen) {
+                                    frame.webkitRequestFullscreen();
+                                } else if (frame.msRequestFullscreen) {
+                                    frame.msRequestFullscreen();
+                                }
+                            }
+                        });
+
+                        if (muteBtn) {
+                            muteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const player = players[uniqueId];
+                                if (player) {
+                                    if (player.isMuted()) {
+                                        player.unMute();
+                                        muteBtn.innerText = "MUTE";
+                                    } else {
+                                        player.mute();
+                                        muteBtn.innerText = "UNMUTE";
+                                    }
+                                }
+                            });
+                        }
+
+                        if (exitBtn) {
+                            exitBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                if (document.fullscreenElement) {
+                                    if (document.exitFullscreen) {
+                                        document.exitFullscreen();
+                                    } else if (document.webkitExitFullscreen) {
+                                        document.webkitExitFullscreen();
+                                    } else if (document.msExitFullscreen) {
+                                        document.msExitFullscreen();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    observer.observe(row);
+                }, 50);
+
+                globalIndex++;
             });
+
+            setTimeout(() => { isFetching = false; }, 500);
         }
 
-        function setupInteractions() {
-            masterProjectCatalog.forEach((project, index) => {
-                const frame = document.getElementById('frame-' + index);
-                const muteBtn = document.getElementById('mute-btn-' + index);
-                const exitBtn = document.getElementById('exit-btn-' + index);
-                const playerKey = 'yt-player-' + index;
-                const poster = document.getElementById('poster-' + index);
-
-                if (frame) {
-                    // Desktop hover
-                    frame.addEventListener('mouseenter', () => {
-                        const player = players[playerKey];
-                        if (player && player.playVideo) {
-                            if (!document.fullscreenElement) {
-                                player.mute(); 
-                            }
-                            player.playVideo();
-                            if (poster) poster.style.opacity = '0';
-                        }
-                    });
-
-                    frame.addEventListener('mouseleave', () => {
-                        if (document.fullscreenElement) return;
-
-                        const player = players[playerKey];
-                        if (player && player.pauseVideo) {
-                            player.pauseVideo();
-                            if (poster) poster.style.opacity = '1';
-                        }
-                    });
-
-                    // Mobile touch / Click handling
-                    frame.addEventListener('click', (e) => {
-                        if (e.target === muteBtn || e.target === exitBtn) return; 
-
-                        const player = players[playerKey];
-                        if (document.fullscreenElement === frame) {
-                            if (player && player.getPlayerState) {
-                                const state = player.getPlayerState();
-                                if (state === YT.PlayerState.PLAYING) {
-                                    player.pauseVideo();
-                                } else {
-                                    player.playVideo();
-                                }
-                            }
-                        } else {
-                            // On touch devices, first tap reveals overlay/plays, second tap or fullscreen toggle goes fullscreen
-                            if (window.matchMedia("(hover: none)").matches && !frame.classList.contains('touch-active')) {
-                                document.querySelectorAll('.project-frame').forEach(f => f.classList.remove('touch-active'));
-                                frame.classList.add('touch-active');
-                                if (player && player.playVideo) {
-                                    player.mute();
-                                    player.playVideo();
-                                    if (poster) poster.style.opacity = '0';
-                                }
-                                return;
-                            }
-
-                            if (frame.requestFullscreen) {
-                                frame.requestFullscreen();
-                            } else if (frame.webkitRequestFullscreen) {
-                                frame.webkitRequestFullscreen();
-                            } else if (frame.msRequestFullscreen) {
-                                frame.msRequestFullscreen();
-                            }
-                        }
-                    });
-
-                    if (muteBtn) {
-                        muteBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            const player = players[playerKey];
-                            if (player) {
-                                if (player.isMuted()) {
-                                    player.unMute();
-                                    muteBtn.innerText = "MUTE";
-                                } else {
-                                    player.mute();
-                                    muteBtn.innerText = "UNMUTE";
-                                }
-                            }
-                        });
-                    }
-
-                    if (exitBtn) {
-                        exitBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (document.fullscreenElement) {
-                                if (document.exitFullscreen) {
-                                    document.exitFullscreen();
-                                } else if (document.webkitExitFullscreen) {
-                                    document.webkitExitFullscreen();
-                                } else if (document.msExitFullscreen) {
-                                    document.msExitFullscreen();
-                                }
-                            }
-                        });
+        // Handle dynamic fullscreen class toggling efficiently across infinite DOM
+        document.addEventListener('fullscreenchange', () => {
+            document.querySelectorAll('.project-frame.is-fullscreen').forEach(frame => {
+                if (frame !== document.fullscreenElement) {
+                    frame.classList.remove('is-fullscreen');
+                    const index = frame.getAttribute('id').replace('frame-', '');
+                    const player = players['yt-player-' + index];
+                    const muteBtn = document.getElementById('mute-btn-' + index);
+                    if (player) {
+                        player.mute();
+                        if (muteBtn) muteBtn.innerText = "UNMUTE";
                     }
                 }
             });
 
-            document.addEventListener('fullscreenchange', () => {
-                masterProjectCatalog.forEach((project, index) => {
-                    const frame = document.getElementById('frame-' + index);
-                    const playerKey = 'yt-player-' + index;
-                    const player = players[playerKey];
-                    const muteBtn = document.getElementById('mute-btn-' + index);
-                    
-                    if (frame && player) {
-                        if (document.fullscreenElement === frame) {
-                            frame.classList.add('is-fullscreen');
-                            player.unMute();
-                            if (muteBtn) muteBtn.innerText = "MUTE";
-                        } else {
-                            frame.classList.remove('is-fullscreen');
-                            player.mute();
-                            if (muteBtn) muteBtn.innerText = "UNMUTE";
-                        }
-                    }
-                });
-            });
-        }
-
-        function setupObserver() {
-            const mainEl = document.getElementById('feed-container');
-            const observerOptions = {
-                root: mainEl,
-                threshold: 0.5 
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const index = entry.target.getAttribute('data-index');
-                    const playerKey = 'yt-player-' + index;
-                    const player = players[playerKey];
-                    const poster = document.getElementById('poster-' + index);
-
-                    if (entry.isIntersecting) {
-                        if (poster) poster.style.opacity = '0';
-                        if (player && player.playVideo) {
-                            player.playVideo();
-                        }
-                    } else {
-                        if (poster) poster.style.opacity = '1';
-                        if (player && player.pauseVideo) {
-                            player.pauseVideo();
-                        }
-                    }
-                });
-            }, observerOptions);
-
-            document.querySelectorAll('.project-row').forEach(row => {
-                observer.observe(row);
-            });
-        }
+            const fsFrame = document.fullscreenElement;
+            if (fsFrame && fsFrame.classList.contains('project-frame')) {
+                fsFrame.classList.add('is-fullscreen');
+                const index = fsFrame.getAttribute('id').replace('frame-', '');
+                const player = players['yt-player-' + index];
+                const muteBtn = document.getElementById('mute-btn-' + index);
+                if (player) {
+                    player.unMute();
+                    if (muteBtn) muteBtn.innerText = "MUTE";
+                }
+            }
+        });
 
         function onYouTubeIframeAPIReady() {
-            buildFeed();
-            initPlayers();
-            setTimeout(() => {
-                setupInteractions();
-                setupObserver();
-                const mainEl = document.getElementById('feed-container');
-                if (mainEl) mainEl.scrollTop = 0;
-            }, 300);
-        }
-
-        if (window.YT && window.YT.Player) {
-            buildFeed();
-            initPlayers();
-            setTimeout(() => {
-                setupInteractions();
-                setupObserver();
-                const mainEl = document.getElementById('feed-container');
-                if (mainEl) mainEl.scrollTop = 0;
-            }, 300);
-        } else {
-            buildFeed();
+            initGlobalObserver();
+            appendBatch();
+            
+            feedContainer.addEventListener('scroll', () => {
+                // If user scrolls within 2 viewport heights of the bottom, load more
+                if (feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - (window.innerHeight * 2)) {
+                    appendBatch();
+                }
+            });
         }
     </script>
 </body>
