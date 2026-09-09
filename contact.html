@@ -89,51 +89,73 @@
             color: #F5F5F5;
         }
 
-        /* Contact Page Brutalist Layout */
+        /* US Graphic Systems Grid & Contact Layout */
         main {
             width: 100vw;
             height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding-top: 148px; /* Offset for header */
+            padding-top: 148px;
         }
 
-        .contact-menu {
+        .contact-grid {
+            width: 80vw;
+            max-width: 1000px;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            /* Significantly increased vertical space between the links */
-            gap: 8vh; 
         }
 
-        .giant-link {
+        .contact-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 24px;
             text-decoration: none;
             color: #000;
-            font-size: 11vw; /* Fills the screen dynamically */
-            font-weight: 900;
-            letter-spacing: -0.04em;
-            line-height: 1;
-            padding: 1vw 4vw; /* Added padding to create the box shape */
-            transition: background-color 0.15s ease, color 0.15s ease;
-            user-select: none; 
+            border-bottom: 1px solid #000;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
-        /* Solid block hover effect */
+        .contact-row:last-child {
+            border-bottom: none;
+        }
+
+        .row-label {
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #666;
+            transition: color 0.2s ease;
+        }
+
+        .row-value {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        /* Clean full-row inversion on hover */
         @media (hover: hover) {
-            .giant-link:hover {
+            .contact-row:hover {
                 background-color: #000;
                 color: #F5F5F5;
             }
+            .contact-row:hover .row-label {
+                color: #AAA;
+            }
         }
 
-        /* Responsive Breakpoints */
+        /* Responsive Settings */
         @media (max-width: 1200px) {
             header { padding: 20px 24px; }
             .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
-            .giant-link { font-size: 14vw; }
+            .contact-grid { width: 92vw; }
+            .row-value { font-size: 22px; }
         }
 
         @media (max-width: 768px) {
@@ -144,17 +166,22 @@
             .header-nav a { padding: 8px 12px; font-size: 10px; }
             
             main { padding-top: 115px; }
-            .contact-menu { gap: 6vh; }
-            .giant-link { 
-                font-size: 16vw; 
-                letter-spacing: -2px; 
-                padding: 2vw 6vw;
+            .contact-grid { width: 95vw; }
+            .contact-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 24px 16px;
             }
-            
-            /* Give it the box effect when tapped on mobile */
-            .giant-link:active {
+            .row-label { font-size: 10px; }
+            .row-value { font-size: 18px; letter-spacing: 0px; }
+
+            .contact-row:active {
                 background-color: #000;
                 color: #F5F5F5;
+            }
+            .contact-row:active .row-label {
+                color: #AAA;
             }
         }
     </style>
@@ -167,16 +194,22 @@
             <div class="company-name">US COLOR COMPANY</div>
         </a>
         <nav class="header-nav">
-            <a href="index.html">WORK</a>
             <a href="about.html">ABOUT</a>
             <a href="contact.html" class="active">CONTACT</a>
         </nav>
     </header>
 
     <main>
-        <div class="contact-menu">
-            <a href="mailto:uscolorcompany@gmail.com" class="giant-link">EMAIL</a>
-            <a href="https://instagram.com/uscolorcompany" target="_blank" rel="noopener noreferrer" class="giant-link">INSTAGRAM</a>
+        <div class="contact-grid">
+            <a href="mailto:uscolorcompany@gmail.com" class="contact-row">
+                <span class="row-label">EMAIL</span>
+                <span class="row-value">USCOLORCOMPANY@GMAIL.COM</span>
+            </a>
+            
+            <a href="https://instagram.com/uscolorcompany" target="_blank" rel="noopener noreferrer" class="contact-row">
+                <span class="row-label">INSTAGRAM</span>
+                <span class="row-value">USCOLORCOMPANY</span>
+            </a>
         </div>
     </main>
 
