@@ -432,9 +432,7 @@
                         
                         <!-- Wrapper holds the thumbnail permanently to prevent Safari flashing -->
                         <div class="video-wrapper" style="background-image: url('${project.poster}'); background-size: cover; background-position: center;">
-                            <video id="video-${index}" muted loop playsinline preload="auto">
-                                <source src="${project.src}" type="video/mp4">
-                            </video>
+                            <video id="video-${index}" src="${project.src}" muted loop playsinline preload="none"></video>
                         </div>
                         
                         <div class="meta-overlay" id="overlay-${index}">
@@ -488,13 +486,20 @@
                     });
 
                     // DESKTOP: Hover to play and wake overlay
+                    // DESKTOP: Hover to play and wake overlay
                     frame.addEventListener('mouseenter', () => {
                         if (!isMobile) {
                             if (!document.fullscreenElement) video.muted = true;
-                            video.play().catch(() => {});
-                            wakeOverlay();
-                        }
-                    });
+        
+        // SAFARI FIX: Force network load if the video is completely unloaded
+                             if (video.readyState === 0) {
+                                 video.load();
+                             }
+        
+                             video.play().catch(e => console.log("Playback failed:", e));
+                             wakeOverlay();
+    }
+});
 
                     // DESKTOP: Mouse movement wakes UI back up
                     frame.addEventListener('mousemove', () => {
