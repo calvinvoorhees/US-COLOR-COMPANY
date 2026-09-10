@@ -432,7 +432,7 @@
                         
                         <!-- Wrapper holds the thumbnail permanently to prevent Safari flashing -->
                         <div class="video-wrapper" style="background-image: url('${project.poster}'); background-size: cover; background-position: center;">
-                            <video id="video-${index}" src="${project.src}" muted loop playsinline preload="none"></video>
+                           <video id="video-${index}" data-src="${project.src}" crossorigin="anonymous" muted loop playsinline preload="none"></video>
                         </div>
                         
                         <div class="meta-overlay" id="overlay-${index}">
