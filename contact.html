@@ -67,6 +67,10 @@
             color: #000;
         }
 
+        .company-name.mobile-only {
+            display: none;
+        }
+
         .header-nav {
             display: flex;
             align-items: center;
@@ -94,6 +98,10 @@
         .header-nav a:hover {
             background-color: #000;
             color: #F5F5F5;
+        }
+
+        .mobile-right-stack {
+            display: none;
         }
 
         /* US Graphic Systems Grid & Contact Layout */
@@ -167,43 +175,51 @@
 
         @media (max-width: 768px) {
             header { 
-                display: grid;
-                grid-template-columns: auto 1fr;
-                align-items: center;
-                gap: 10px; 
-                padding: 10px 2.5vw; 
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 14px; 
+                padding: 16px 2.5vw; 
             }
-            .header-left img { height: 35px; width: auto; }
+            .header-left {
+                justify-content: flex-start;
+                width: 100%;
+            }
+            .header-left img { height: 45px; width: auto; }
             
+            .header-left .company-name {
+                display: none;
+            }
+
             .mobile-right-stack {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 width: 100%;
-                gap: 4px;
+                gap: 10px;
             }
 
-            .company-name { 
-                font-size: 10px; 
+            .company-name.mobile-only { 
+                font-size: 12px; 
                 text-align: center;
-                letter-spacing: 0.5px;
-                display: block !important;
+                letter-spacing: 1px;
+                display: block;
             }
             
             .header-nav { 
                 width: 100%; 
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 2px; 
+                gap: 4px; 
                 text-align: center;
             }
             .header-nav a { 
-                padding: 4px 0; 
-                font-size: 9px; 
+                padding: 10px 0; 
+                font-size: 10px; 
                 justify-content: center;
             }
             
-            main { padding-top: 95px; }
+            main { padding-top: 145px; }
             .contact-grid { width: 95vw; }
             .contact-row {
                 flex-direction: column;
@@ -229,11 +245,20 @@
     <header>
         <a href="index.html" class="header-left">
             <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
-            <div class="company-name desktop-only">US COLOR COMPANY</div>
+            <div class="company-name">US COLOR COMPANY</div>
         </a>
+        
+        <!-- Desktop Nav -->
+        <nav class="header-nav desktop-only">
+            <a href="index.html">WORK</a>
+            <a href="about.html">ABOUT</a>
+            <a href="contact.html" class="active">CONTACT</a>
+        </nav>
+
+        <!-- Mobile Stack -->
         <div class="mobile-right-stack">
             <div class="company-name mobile-only">US COLOR COMPANY</div>
-            <nav class="header-nav">
+            <nav class="header-nav mobile-only">
                 <a href="index.html">WORK</a>
                 <a href="about.html">ABOUT</a>
                 <a href="contact.html" class="active">CONTACT</a>
