@@ -40,7 +40,7 @@
             background-color: rgba(245, 245, 245, 0.95);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            padding: 24px 48px;
+            padding: 20px 48px;
             border-bottom: 1px solid #000;
         }
 
@@ -52,9 +52,9 @@
             cursor: pointer;
         }
 
-        /* Scaled up logo to fill the header space */
+        /* Scaled down logo */
         .header-left img {
-            height: 140px; 
+            height: 90px; 
             width: auto;
             display: block;
             object-fit: contain;
@@ -102,7 +102,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding-top: 180px;
+            padding-top: 130px; /* Reduced to match new header size */
         }
 
         .contact-grid {
@@ -156,22 +156,23 @@
 
         /* Responsive Settings */
         @media (max-width: 1200px) {
-            header { padding: 20px 24px; }
-            .header-left img { height: 90px; }
+            header { padding: 16px 24px; }
+            .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
             .contact-grid { width: 92vw; }
             .row-value { font-size: 22px; }
-            main { padding-top: 130px; }
+            main { padding-top: 110px; }
         }
 
         @media (max-width: 768px) {
-            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
-            .header-left img { height: 60px; }
+            /* Uses 2.5vw padding so the logo dynamically aligns with the 95vw frame below it */
+            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 2.5vw; }
+            .header-left img { height: 45px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
             .header-nav a { padding: 8px 12px; font-size: 10px; }
             
-            main { padding-top: 125px; }
+            main { padding-top: 105px; }
             .contact-grid { width: 95vw; }
             .contact-row {
                 flex-direction: column;
