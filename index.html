@@ -301,29 +301,36 @@
 
         @media (max-width: 768px) {
             header { 
+                position: fixed;
                 display: flex;
                 flex-direction: column;
                 align-items: stretch;
                 gap: 16px; 
-                padding: 20px 4vw; /* Generous breathing room for mobile */
+                padding: 20px 4vw; 
             }
             .header-left {
+                position: relative;
                 justify-content: flex-start;
                 align-items: center;
                 width: 100%;
                 gap: 16px;
             }
-            .header-left img { height: 50px; width: auto; } /* Slightly larger flag */
+            .header-left img { height: 50px; width: auto; }
             
             .header-left .company-name {
-                display: none; /* Hidden next to logo, shown below */
+                display: none;
             }
 
+            /* Shifted over slightly past absolute center to balance visual weight against the left flag logo */
             .company-name.mobile-only { 
-                font-size: 15px; 
+                position: absolute;
+                left: 54%;
+                transform: translateX(-50%);
+                font-size: 14px; 
                 font-weight: 900;
                 letter-spacing: 1px;
                 display: block;
+                white-space: nowrap;
             }
             
             .header-nav.desktop-only {
@@ -356,7 +363,7 @@
             }
             
             main { 
-                padding-top: 160px; /* Expansive mobile header padding */
+                padding-top: 160px; 
                 scroll-snap-type: none; 
             }
             .project-row { 

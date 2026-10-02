@@ -175,6 +175,7 @@
 
         @media (max-width: 768px) {
             header { 
+                position: fixed;
                 display: flex;
                 flex-direction: column;
                 align-items: stretch;
@@ -182,6 +183,7 @@
                 padding: 20px 4vw; 
             }
             .header-left {
+                position: relative;
                 justify-content: flex-start;
                 align-items: center;
                 width: 100%;
@@ -194,10 +196,14 @@
             }
 
             .company-name.mobile-only { 
-                font-size: 15px; 
+                position: absolute;
+                left: 54%;
+                transform: translateX(-50%);
+                font-size: 14px; 
                 font-weight: 900;
                 letter-spacing: 1px;
                 display: block;
+                white-space: nowrap;
             }
             
             .header-nav.desktop-only {
