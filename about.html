@@ -188,23 +188,24 @@
                 display: grid;
                 grid-template-columns: auto 1fr;
                 align-items: center;
-                gap: 12px; 
-                padding: 12px 2.5vw; 
+                gap: 10px; 
+                padding: 10px 2.5vw; 
             }
-            .header-left img { height: 40px; width: auto; }
+            .header-left img { height: 35px; width: auto; }
             
             .mobile-right-stack {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 width: 100%;
-                gap: 6px;
+                gap: 4px;
             }
 
             .company-name { 
-                font-size: 11px; 
+                font-size: 10px; 
                 text-align: center;
                 letter-spacing: 0.5px;
+                display: block !important;
             }
             
             .header-nav { 
@@ -215,12 +216,12 @@
                 text-align: center;
             }
             .header-nav a { 
-                padding: 6px 0; 
+                padding: 4px 0; 
                 font-size: 9px; 
                 justify-content: center;
             }
             
-            main { padding-top: 130px; padding-bottom: 48px; }
+            main { padding-top: 115px; padding-bottom: 48px; }
             .about-container { 
                 width: 95vw; 
                 grid-template-columns: 1fr; 
@@ -241,9 +242,10 @@
     <header>
         <a href="index.html" class="header-left">
             <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
+            <div class="company-name desktop-only">US COLOR COMPANY</div>
         </a>
         <div class="mobile-right-stack">
-            <div class="company-name">US COLOR COMPANY</div>
+            <div class="company-name mobile-only">US COLOR COMPANY</div>
             <nav class="header-nav">
                 <a href="index.html">WORK</a>
                 <a href="about.html" class="active">ABOUT</a>
