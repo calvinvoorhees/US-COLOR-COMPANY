@@ -44,7 +44,7 @@
             background-color: rgba(245, 245, 245, 0.95);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            padding: 24px 48px;
+            padding: 20px 48px; 
             border-bottom: 1px solid #000;
         }
 
@@ -57,7 +57,7 @@
         }
 
         .header-left img {
-            height: 140px; 
+            height: 90px; 
             width: auto;
             display: block;
             object-fit: contain;
@@ -117,7 +117,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding-top: 180px; 
+            padding-top: 130px; 
             background-color: #F5F5F5;
             border-bottom: 1px solid #000;
             scroll-snap-align: start;
@@ -157,17 +157,27 @@
             width: 100%; height: 100%; 
             z-index: 5; 
             background-color: #000;
-            overflow: hidden; /* Ensures scaling doesn't break boundaries */
+            overflow: hidden;
         }
 
-        /* Hide Vimeo iframe behind opacity 0 and scale slightly to crop black edges */
-        .video-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Passes hovers down to the frame */
-            opacity: 0;
+        .poster-image {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
             transition: opacity 0.4s ease;
-            transform: scale(1.02);
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; 
+            opacity: 0;
+            z-index: 2;
+            transition: opacity 0.4s ease;
         }
 
         .meta-overlay {
@@ -272,21 +282,21 @@
         }
 
         @media (max-width: 1200px) {
-            header { padding: 20px 24px; }
-            .header-left img { height: 90px; }
+            header { padding: 16px 24px; }
+            .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
             .project-frame { width: 92vw; }
-            .project-row { padding-top: 130px; }
+            .project-row { padding-top: 110px; }
         }
 
         @media (max-width: 768px) {
-            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
-            .header-left img { height: 60px; }
+            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 2.5vw; }
+            .header-left img { height: 45px; }
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
             .header-nav a { padding: 8px 12px; font-size: 10px; }
             .project-frame { width: 95vw; }
-            .project-row { padding-top: 125px; }
+            .project-row { padding-top: 105px; }
             .meta-title { font-size: 20px; }
             .fullscreen-gui { bottom: 20px; right: 20px; gap: 10px; }
             .fs-control-btn { padding: 8px 16px; font-size: 10px; }
@@ -315,10 +325,9 @@
     </main>
 
     <script>
-        // Update these with your actual Vimeo Video IDs
         const masterProjectCatalog = [
             {
-                vimeoId: "76979871", 
+                vimeoId: "1232416663", 
                 poster: "worstfriend.jpg",
                 year: "2026",
                 genre: "MUSIC VIDEO",
@@ -336,7 +345,7 @@
                 colors: ["#0B1320", "#2F4858", "#86BBD8", "#F6F7F8"]
             },
             {
-                vimeoId: "76979871",
+                vimeoId: "1232417804",
                 poster: "newshoes.png",
                 year: "2026",
                 genre: "COMMERCIAL",
@@ -354,7 +363,7 @@
                 colors: ["#1C1E18", "#4A5240", "#D3A052", "#E8E9E1"]
             },
             {
-                vimeoId: "76979871",
+                vimeoId: "1232416922",
                 poster: "Pygmy.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -363,7 +372,7 @@
                 colors: ["#0D0F12", "#2B3A42", "#8D99AE", "#EF233C"]
             },
             {
-                vimeoId: "76979871",
+                vimeoId: "1232417350",
                 poster: "unleavened.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -372,7 +381,7 @@
                 colors: ["#1F1A17", "#5E4A3D", "#A68065", "#EADDCD"]
             },
             {
-                vimeoId: "1232404814",
+                vimeoId: "1232417215",
                 poster: "boring.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -381,7 +390,7 @@
                 colors: ["#181818", "#4A4A4A", "#9CA3AF", "#F3F4F6"]
             },
             {
-                vimeoId: "76979871",
+                vimeoId: "1232420360",
                 poster: "udrcabme.jpg",
                 year: "2025",
                 genre: "MUSIC VIDEO",
@@ -397,7 +406,6 @@
         let isFetching = false;
         const isMobile = window.matchMedia("(hover: none)").matches;
         
-        // Global object to track Vimeo players for fullscreen sync
         const vimeoPlayers = {};
 
         function initObserver() {
@@ -435,8 +443,8 @@
                             <button class="fs-control-btn exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
                         </div>
                         
-                        <div class="video-wrapper" style="background-image: url('${project.poster}'); background-size: cover; background-position: center;">
-                            <!-- Iframe source is kept blank to save bandwidth until hover -->
+                        <div class="video-wrapper">
+                            <div class="poster-image" id="poster-${index}" style="background-image: url('${project.poster}');"></div>
                             <iframe id="vimeo-${index}" allow="autoplay; fullscreen" frameborder="0"></iframe>
                         </div>
                         
@@ -458,6 +466,7 @@
                 setTimeout(() => {
                     const frame = document.getElementById(`frame-${index}`);
                     const iframe = document.getElementById(`vimeo-${index}`);
+                    const poster = document.getElementById(`poster-${index}`);
                     const overlay = document.getElementById(`overlay-${index}`);
                     const muteBtn = document.getElementById(`mute-btn-${index}`);
                     const exitBtn = document.getElementById(`exit-btn-${index}`);
@@ -471,7 +480,7 @@
                         overlay.style.opacity = '1';
                         clearTimeout(hideOverlayTimer);
                         
-                        if (isPlaying && !document.fullscreenElement) {
+                        if (isPlaying && !document.fullscreenElement && !document.webkitFullscreenElement) {
                             hideOverlayTimer = setTimeout(() => {
                                 overlay.style.opacity = '0';
                             }, 2500);
@@ -479,56 +488,55 @@
                     };
 
                     const loadAndPlayVideo = () => {
-                        // URL parameters strictly disable controls, titles, and forces a silent loop
                         if (!iframe.src) {
-                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1`;
+                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&quality=1080p&initial_quality=1080p`;
                             player = new Vimeo.Player(iframe);
                             vimeoPlayers[index] = player;
 
                             player.on('play', () => {
                                 isPlaying = true;
                                 iframe.style.opacity = '1';
+                                poster.style.opacity = '0'; 
                                 wakeOverlay();
                             });
 
                             player.on('pause', () => {
                                 isPlaying = false;
-                                if (!document.fullscreenElement) {
+                                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                                     iframe.style.opacity = '0';
+                                    poster.style.opacity = '1'; 
                                 }
                             });
                         }
                         if (player) player.play().catch(() => {});
                     };
 
-                    // DESKTOP HOVER
                     frame.addEventListener('mouseenter', () => {
                         if (!isMobile) {
-                            if (player && !document.fullscreenElement) player.setMuted(true);
+                            if (player && !document.fullscreenElement && !document.webkitFullscreenElement) player.setMuted(true);
                             loadAndPlayVideo();
                             wakeOverlay();
                         }
                     });
 
                     frame.addEventListener('mousemove', () => {
-                        if (!isMobile && !document.fullscreenElement) {
+                        if (!isMobile && !document.fullscreenElement && !document.webkitFullscreenElement) {
                             wakeOverlay();
                         }
                     });
 
                     frame.addEventListener('mouseleave', () => {
-                        if (!isMobile && !document.fullscreenElement) {
+                        if (!isMobile && !document.fullscreenElement && !document.webkitFullscreenElement) {
                             if (player) player.pause();
                             clearTimeout(hideOverlayTimer);
                             overlay.style.opacity = '0'; 
                         }
                     });
 
-                    // CLICK INTERACTION
                     frame.addEventListener('click', (e) => {
                         if (e.target.tagName === 'BUTTON') return;
 
-                        if (document.fullscreenElement === frame) {
+                        if (document.fullscreenElement === frame || document.webkitFullscreenElement === frame) {
                             if (isPlaying) player.pause();
                             else player.play();
                         } else {
@@ -544,6 +552,12 @@
                                 }
                                 wakeOverlay();
                             } else {
+                                // Explicitly unmute ON CLICK before expanding to satisfy browser autoplay policies
+                                if (player) {
+                                    player.setVolume(1).catch(()=>{});
+                                    player.setMuted(false).catch(()=>{});
+                                }
+                                
                                 if (frame.requestFullscreen) {
                                     frame.requestFullscreen().catch(() => {});
                                 } else if (frame.webkitRequestFullscreen) {
@@ -553,11 +567,16 @@
                         }
                     });
 
-                    // MOBILE SPECIFIC FULLSCREEN
                     if (mobileFsBtn) {
                         mobileFsBtn.addEventListener('click', (e) => {
                             e.stopPropagation();
                             if (!iframe.src) loadAndPlayVideo();
+                            
+                            // Explicitly unmute ON CLICK for mobile
+                            if (player) {
+                                player.setVolume(1).catch(()=>{});
+                                player.setMuted(false).catch(()=>{});
+                            }
                             
                             if (frame.requestFullscreen) {
                                 frame.requestFullscreen().catch(() => {});
@@ -580,6 +599,7 @@
                     exitBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         if (document.fullscreenElement) document.exitFullscreen();
+                        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
                     });
 
                     observer.observe(row);
@@ -591,17 +611,19 @@
             setTimeout(() => { isFetching = false; }, 400);
         }
 
-        document.addEventListener('fullscreenchange', () => {
+        const handleFullscreenChange = () => {
             document.querySelectorAll('.project-frame').forEach(frame => {
                 const index = frame.getAttribute('data-index');
                 const player = vimeoPlayers[index];
                 const muteBtn = frame.querySelector('.mute-btn');
                 const overlay = frame.querySelector('.meta-overlay');
 
-                if (document.fullscreenElement === frame) {
+                if (document.fullscreenElement === frame || document.webkitFullscreenElement === frame) {
                     frame.classList.add('is-fullscreen');
                     if (player) {
-                        player.setMuted(false);
+                        // Double-check volume and play state
+                        player.setVolume(1).catch(()=>{});
+                        player.setMuted(false).catch(()=>{});
                         player.play().catch(() => {});
                     }
                     overlay.style.opacity = '0';
@@ -609,13 +631,17 @@
                 } else {
                     frame.classList.remove('is-fullscreen');
                     if (player) {
-                        player.setMuted(true);
-                        player.pause();
+                        player.setMuted(true).catch(()=>{});
+                        player.pause().catch(()=>{});
                     }
                     if (muteBtn) muteBtn.innerText = "UNMUTE";
                 }
             });
-        });
+        };
+
+        // Standard and Safari-specific listeners
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
         window.addEventListener('DOMContentLoaded', () => {
             initObserver();
