@@ -39,13 +39,21 @@
             width: 100vw;
             z-index: 999;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: center; /* Centers the inner container */
             background-color: rgba(245, 245, 245, 0.95);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            padding: 20px 48px; 
             border-bottom: 1px solid #000;
+        }
+
+        /* Inner container perfectly matches the video frame width constraints */
+        .header-inner {
+            width: 80vw;
+            max-width: 1400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
         }
 
         .header-left {
@@ -73,12 +81,14 @@
 
         .header-nav {
             display: flex;
-            align-items: stretch;
+            align-items: center;
+            gap: 12px; /* Perfect, even spacing between buttons */
         }
 
         .header-nav a {
             display: flex;
             align-items: center;
+            justify-content: center;
             padding: 10px 24px;
             text-decoration: none;
             color: #000;
@@ -282,7 +292,7 @@
         }
 
         @media (max-width: 1200px) {
-            header { padding: 16px 24px; }
+            .header-inner { width: 92vw; padding: 16px 0; }
             .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
             .project-frame { width: 92vw; }
@@ -290,13 +300,23 @@
         }
 
         @media (max-width: 768px) {
-            header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 2.5vw; }
+            .header-inner { 
+                width: 95vw; /* Perfectly matched to the 95vw project frame below */
+                flex-direction: column; 
+                align-items: flex-start; /* Keeps logo flush to the left boundary */
+                gap: 16px;
+                padding: 16px 0; 
+            }
             .header-left img { height: 45px; }
             .company-name { font-size: 14px; }
-            .header-nav { width: 100%; justify-content: space-between; }
-            .header-nav a { padding: 8px 12px; font-size: 10px; }
             
-            /* Removes rigid 100vh vertical snapping to fix negative space */
+            .header-nav { 
+                width: 100%; 
+                justify-content: center; /* Perfectly centers nav items on mobile */
+                gap: 8px; 
+            }
+            .header-nav a { padding: 8px 16px; font-size: 10px; }
+            
             main { 
                 padding-top: 105px; 
                 scroll-snap-type: none; 
@@ -311,7 +331,6 @@
                 margin: 0 auto; 
             }
             
-            /* Unclutters the overlay completely */
             .meta-overlay { padding: 16px; }
             .meta-top, .palette { display: none !important; }
             .meta-bottom { 
@@ -335,15 +354,17 @@
 <body>
 
     <header>
-        <a href="index.html" class="header-left">
-            <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
-            <div class="company-name">US COLOR COMPANY</div>
-        </a>
-        <nav class="header-nav">
-            <a href="index.html" class="active">WORK</a>
-            <a href="about.html">ABOUT</a>
-            <a href="contact.html">CONTACT</a>
-        </nav>
+        <div class="header-inner">
+            <a href="index.html" class="header-left">
+                <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
+                <div class="company-name">US COLOR COMPANY</div>
+            </a>
+            <nav class="header-nav">
+                <a href="index.html" class="active">WORK</a>
+                <a href="about.html">ABOUT</a>
+                <a href="contact.html">CONTACT</a>
+            </nav>
+        </div>
     </header>
 
     <main id="feed-container">
@@ -517,12 +538,10 @@
 
                     const loadAndPlayVideo = () => {
                         if (!iframe.src) {
-                            // Added texttrack=none to URL as first layer of subtitle defense
                             iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&quality=1080p&initial_quality=1080p&texttrack=none`;
                             player = new Vimeo.Player(iframe);
                             vimeoPlayers[index] = player;
 
-                            // Second layer of defense: explicitly disable text tracks via API
                             player.ready().then(() => {
                                 player.disableTextTrack().catch(() => {});
                             });
@@ -609,9 +628,7 @@
                                 player.setVolume(1).catch(()=>{});
                                 player.setMuted(false).catch(()=>{});
                                 
-                                // Direct Vimeo API request for iOS native player override
                                 player.requestFullscreen().catch(() => {
-                                    // Fallback to container expansion if Vimeo API fails
                                     if (frame.requestFullscreen) {
                                         frame.requestFullscreen().catch(() => {});
                                     } else if (frame.webkitRequestFullscreen) {
@@ -681,7 +698,6 @@
             initObserver();
             appendBatch();
 
-            // Modified scroll logic to work without snap-points
             feedContainer.addEventListener('scroll', () => {
                 if (feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - (window.innerHeight * 2)) {
                     appendBatch();
