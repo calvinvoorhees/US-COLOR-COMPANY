@@ -27,7 +27,7 @@
             height: 100vh;
         }
 
-        /* Fixed Minimal Header */
+        /* Full-Width Header */
         header {
             position: fixed;
             top: 0;
@@ -35,21 +35,13 @@
             width: 100vw;
             z-index: 999;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
             background-color: rgba(245, 245, 245, 0.95);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
+            padding: 20px 48px; /* Hard pins logo to the left on desktop */
             border-bottom: 1px solid #000;
-        }
-
-        /* Matches the width constraints of the content container exactly */
-        .header-inner {
-            width: 80vw;
-            max-width: 1400px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
         }
 
         .header-left {
@@ -116,7 +108,7 @@
 
         .contact-grid {
             width: 80vw;
-            max-width: 1400px; /* Expanded to perfectly align with the new header bounds */
+            max-width: 1400px; 
             border-top: 1px solid #000;
             border-bottom: 1px solid #000;
             display: flex;
@@ -165,7 +157,7 @@
 
         /* Responsive Settings */
         @media (max-width: 1200px) {
-            .header-inner { width: 92vw; padding: 16px 0; }
+            header { padding: 16px 24px; }
             .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
             .contact-grid { width: 92vw; }
@@ -174,22 +166,29 @@
         }
 
         @media (max-width: 768px) {
-            .header-inner { 
-                width: 95vw; 
+            header { 
                 flex-direction: column; 
-                align-items: flex-start; 
-                gap: 16px;
-                padding: 16px 0; 
+                align-items: flex-start; /* Keeps logo completely flush left */
+                gap: 16px; 
+                padding: 16px 2.5vw; 
             }
             .header-left img { height: 45px; }
             .company-name { font-size: 14px; }
             
             .header-nav { 
                 width: 100%; 
-                justify-content: center; 
-                gap: 8px; 
+                justify-content: space-between; 
+                gap: 0; 
             }
-            .header-nav a { padding: 8px 16px; font-size: 10px; }
+            .header-nav a { 
+                padding: 8px 0; 
+                font-size: 10px; 
+                flex: 1; /* Equal space distribution */
+            }
+            /* Explicit mobile positioning: Left, Center, Right */
+            .header-nav a:nth-child(1) { justify-content: flex-start; }
+            .header-nav a:nth-child(2) { justify-content: center; }
+            .header-nav a:nth-child(3) { justify-content: flex-end; }
             
             main { padding-top: 105px; }
             .contact-grid { width: 95vw; }
@@ -215,17 +214,15 @@
 <body>
 
     <header>
-        <div class="header-inner">
-            <a href="index.html" class="header-left">
-                <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
-                <div class="company-name">US COLOR COMPANY</div>
-            </a>
-            <nav class="header-nav">
-                <a href="index.html">WORK</a>
-                <a href="about.html">ABOUT</a>
-                <a href="contact.html" class="active">CONTACT</a>
-            </nav>
-        </div>
+        <a href="index.html" class="header-left">
+            <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
+            <div class="company-name">US COLOR COMPANY</div>
+        </a>
+        <nav class="header-nav">
+            <a href="index.html">WORK</a>
+            <a href="about.html">ABOUT</a>
+            <a href="contact.html" class="active">CONTACT</a>
+        </nav>
     </header>
 
     <main>

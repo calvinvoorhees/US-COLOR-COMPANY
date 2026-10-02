@@ -31,7 +31,7 @@
             height: 100vh;
         }
 
-        /* Fixed Minimal Header */
+        /* Full-Width Header */
         header {
             position: fixed;
             top: 0;
@@ -39,21 +39,13 @@
             width: 100vw;
             z-index: 999;
             display: flex;
-            justify-content: center; /* Centers the inner container */
+            justify-content: space-between;
+            align-items: center;
             background-color: rgba(245, 245, 245, 0.95);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
+            padding: 20px 48px; /* Hard pins logo to the left on desktop */
             border-bottom: 1px solid #000;
-        }
-
-        /* Inner container perfectly matches the video frame width constraints */
-        .header-inner {
-            width: 80vw;
-            max-width: 1400px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
         }
 
         .header-left {
@@ -82,7 +74,7 @@
         .header-nav {
             display: flex;
             align-items: center;
-            gap: 12px; /* Perfect, even spacing between buttons */
+            gap: 12px;
         }
 
         .header-nav a {
@@ -292,7 +284,7 @@
         }
 
         @media (max-width: 1200px) {
-            .header-inner { width: 92vw; padding: 16px 0; }
+            header { padding: 16px 24px; }
             .header-left img { height: 70px; }
             .company-name { font-size: 16px; }
             .project-frame { width: 92vw; }
@@ -300,22 +292,29 @@
         }
 
         @media (max-width: 768px) {
-            .header-inner { 
-                width: 95vw; /* Perfectly matched to the 95vw project frame below */
+            header { 
                 flex-direction: column; 
-                align-items: flex-start; /* Keeps logo flush to the left boundary */
-                gap: 16px;
-                padding: 16px 0; 
+                align-items: flex-start; /* Keeps logo completely flush left */
+                gap: 16px; 
+                padding: 16px 2.5vw; 
             }
             .header-left img { height: 45px; }
             .company-name { font-size: 14px; }
             
             .header-nav { 
                 width: 100%; 
-                justify-content: center; /* Perfectly centers nav items on mobile */
-                gap: 8px; 
+                justify-content: space-between; 
+                gap: 0; 
             }
-            .header-nav a { padding: 8px 16px; font-size: 10px; }
+            .header-nav a { 
+                padding: 8px 0; 
+                font-size: 10px; 
+                flex: 1; /* Equal space distribution */
+            }
+            /* Explicit mobile positioning: Left, Center, Right */
+            .header-nav a:nth-child(1) { justify-content: flex-start; }
+            .header-nav a:nth-child(2) { justify-content: center; }
+            .header-nav a:nth-child(3) { justify-content: flex-end; }
             
             main { 
                 padding-top: 105px; 
@@ -354,17 +353,15 @@
 <body>
 
     <header>
-        <div class="header-inner">
-            <a href="index.html" class="header-left">
-                <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
-                <div class="company-name">US COLOR COMPANY</div>
-            </a>
-            <nav class="header-nav">
-                <a href="index.html" class="active">WORK</a>
-                <a href="about.html">ABOUT</a>
-                <a href="contact.html">CONTACT</a>
-            </nav>
-        </div>
+        <a href="index.html" class="header-left">
+            <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
+            <div class="company-name">US COLOR COMPANY</div>
+        </a>
+        <nav class="header-nav">
+            <a href="index.html" class="active">WORK</a>
+            <a href="about.html">ABOUT</a>
+            <a href="contact.html">CONTACT</a>
+        </nav>
     </header>
 
     <main id="feed-container">
