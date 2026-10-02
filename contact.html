@@ -167,41 +167,42 @@
 
         @media (max-width: 768px) {
             header { 
-                flex-direction: column; 
-                align-items: stretch; 
-                gap: 16px; 
-                padding: 16px 2.5vw; 
+                display: grid;
+                grid-template-columns: auto 1fr;
+                align-items: center;
+                gap: 12px; 
+                padding: 12px 2.5vw; 
             }
-            .header-left {
-                justify-content: flex-start;
-                width: 100%;
-            }
-            .header-left img { height: 45px; }
+            .header-left img { height: 40px; width: auto; }
             
-            /* Centers company name directly above navigation links */
+            .mobile-right-stack {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                gap: 6px;
+            }
+
             .company-name { 
-                font-size: 13px; 
+                font-size: 11px; 
                 text-align: center;
-                width: 100%;
-                order: 3;
+                letter-spacing: 0.5px;
             }
             
-            /* Centers and equally spaces navigation headings on mobile */
             .header-nav { 
                 width: 100%; 
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 4px; 
+                gap: 2px; 
                 text-align: center;
-                order: 4;
             }
             .header-nav a { 
-                padding: 8px 0; 
-                font-size: 10px; 
+                padding: 6px 0; 
+                font-size: 9px; 
                 justify-content: center;
             }
             
-            main { padding-top: 145px; }
+            main { padding-top: 115px; }
             .contact-grid { width: 95vw; }
             .contact-row {
                 flex-direction: column;
@@ -228,12 +229,14 @@
         <a href="index.html" class="header-left">
             <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
         </a>
-        <div class="company-name">US COLOR COMPANY</div>
-        <nav class="header-nav">
-            <a href="index.html">WORK</a>
-            <a href="about.html">ABOUT</a>
-            <a href="contact.html" class="active">CONTACT</a>
-        </nav>
+        <div class="mobile-right-stack">
+            <div class="company-name">US COLOR COMPANY</div>
+            <nav class="header-nav">
+                <a href="index.html">WORK</a>
+                <a href="about.html">ABOUT</a>
+                <a href="contact.html" class="active">CONTACT</a>
+            </nav>
+        </div>
     </header>
 
     <main>
