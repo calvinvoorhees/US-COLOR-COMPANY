@@ -71,7 +71,6 @@
             color: #000;
         }
 
-        /* Hidden on mobile, handled by mobile-right-stack */
         .company-name.mobile-only {
             display: none;
         }
@@ -105,7 +104,7 @@
             color: #F5F5F5;
         }
 
-        .mobile-right-stack {
+        .mobile-bottom-nav {
             display: none;
         }
 
@@ -305,50 +304,59 @@
                 display: flex;
                 flex-direction: column;
                 align-items: stretch;
-                gap: 14px; 
-                padding: 16px 2.5vw; 
+                gap: 16px; 
+                padding: 20px 4vw; /* Generous breathing room for mobile */
             }
             .header-left {
                 justify-content: flex-start;
-                width: 100%;
-            }
-            .header-left img { height: 45px; width: auto; }
-            
-            /* Hides desktop company name next to logo */
-            .header-left .company-name {
-                display: none;
-            }
-
-            .mobile-right-stack {
-                display: flex;
-                flex-direction: column;
                 align-items: center;
                 width: 100%;
-                gap: 10px;
+                gap: 16px;
+            }
+            .header-left img { height: 50px; width: auto; } /* Slightly larger flag */
+            
+            .header-left .company-name {
+                display: none; /* Hidden next to logo, shown below */
             }
 
             .company-name.mobile-only { 
-                font-size: 12px; 
-                text-align: center;
+                font-size: 15px; 
+                font-weight: 900;
                 letter-spacing: 1px;
                 display: block;
             }
             
-            .header-nav { 
+            .header-nav.desktop-only {
+                display: none;
+            }
+
+            .mobile-bottom-nav { 
                 width: 100%; 
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 4px; 
+                gap: 6px; 
                 text-align: center;
+                border-top: 1px solid rgba(0,0,0,0.15);
+                padding-top: 14px;
             }
-            .header-nav a { 
-                padding: 10px 0; 
-                font-size: 10px; 
+            .mobile-bottom-nav a { 
+                display: flex;
+                align-items: center;
                 justify-content: center;
+                padding: 10px 0; 
+                font-size: 11px; 
+                font-weight: 900;
+                letter-spacing: 1px;
+                color: #000;
+                text-decoration: none;
+            }
+            .mobile-bottom-nav a.active {
+                background-color: #000;
+                color: #F5F5F5;
             }
             
             main { 
-                padding-top: 145px; /* Clean spacing for mobile header */
+                padding-top: 160px; /* Expansive mobile header padding */
                 scroll-snap-type: none; 
             }
             .project-row { 
@@ -386,7 +394,8 @@
     <header>
         <a href="index.html" class="header-left">
             <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
-            <div class="company-name">US COLOR COMPANY</div>
+            <div class="company-name desktop-only">US COLOR COMPANY</div>
+            <div class="company-name mobile-only">US COLOR COMPANY</div>
         </a>
         
         <!-- Desktop Nav -->
@@ -396,15 +405,12 @@
             <a href="contact.html">CONTACT</a>
         </nav>
 
-        <!-- Mobile Stack -->
-        <div class="mobile-right-stack">
-            <div class="company-name mobile-only">US COLOR COMPANY</div>
-            <nav class="header-nav mobile-only">
-                <a href="index.html" class="active">WORK</a>
-                <a href="about.html">ABOUT</a>
-                <a href="contact.html">CONTACT</a>
-            </nav>
-        </div>
+        <!-- Mobile Bottom Nav Row -->
+        <nav class="mobile-bottom-nav">
+            <a href="index.html" class="active">WORK</a>
+            <a href="about.html">ABOUT</a>
+            <a href="contact.html">CONTACT</a>
+        </nav>
     </header>
 
     <main id="feed-container">
