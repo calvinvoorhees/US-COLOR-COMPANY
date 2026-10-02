@@ -22,9 +22,9 @@
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-transform: uppercase;
             -webkit-font-smoothing: antialiased;
-            overflow: hidden; 
+            overflow-x: hidden; 
             width: 100vw;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         /* Full-Width Header */
@@ -235,7 +235,12 @@
                 color: #F5F5F5;
             }
             
-            main { padding-top: 160px; }
+            /* Fixed mobile vertical centering fix */
+            main { 
+                height: auto;
+                min-height: 100vh;
+                padding: 160px 0 50px 0; 
+            }
             .contact-grid { width: 95vw; }
             .contact-row {
                 flex-direction: column;
