@@ -146,8 +146,8 @@
             cursor: default;
         }
 
-        .project-frame.is-fullscreen .palette,
-        .project-frame.is-fullscreen .mobile-fs-btn {
+        /* HARD HIDE THE OVERLAY IN FULLSCREEN TO PREVENT DIMMING */
+        .project-frame.is-fullscreen .meta-overlay {
             display: none !important;
         }
 
@@ -477,10 +477,13 @@
                     let hideOverlayTimer;
 
                     const wakeOverlay = () => {
+                        // Prevent overlay from waking up and dimming the screen during fullscreen
+                        if (document.fullscreenElement || document.webkitFullscreenElement) return;
+
                         overlay.style.opacity = '1';
                         clearTimeout(hideOverlayTimer);
                         
-                        if (isPlaying && !document.fullscreenElement && !document.webkitFullscreenElement) {
+                        if (isPlaying) {
                             hideOverlayTimer = setTimeout(() => {
                                 overlay.style.opacity = '0';
                             }, 2500);
@@ -552,7 +555,6 @@
                                 }
                                 wakeOverlay();
                             } else {
-                                // Explicitly unmute ON CLICK before expanding to satisfy browser autoplay policies
                                 if (player) {
                                     player.setVolume(1).catch(()=>{});
                                     player.setMuted(false).catch(()=>{});
@@ -572,7 +574,6 @@
                             e.stopPropagation();
                             if (!iframe.src) loadAndPlayVideo();
                             
-                            // Explicitly unmute ON CLICK for mobile
                             if (player) {
                                 player.setVolume(1).catch(()=>{});
                                 player.setMuted(false).catch(()=>{});
@@ -621,7 +622,6 @@
                 if (document.fullscreenElement === frame || document.webkitFullscreenElement === frame) {
                     frame.classList.add('is-fullscreen');
                     if (player) {
-                        // Double-check volume and play state
                         player.setVolume(1).catch(()=>{});
                         player.setMuted(false).catch(()=>{});
                         player.play().catch(() => {});
@@ -639,7 +639,6 @@
             });
         };
 
-        // Standard and Safari-specific listeners
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
