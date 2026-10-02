@@ -9,6 +9,9 @@
     <!-- Browser Tab Icon (Favicon) -->
     <link rel="icon" type="image/png" href="uscolorcompanyLOGO.PNG">
 
+    <!-- Vimeo Player SDK -->
+    <script src="https://player.vimeo.com/api/player.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -154,15 +157,17 @@
             width: 100%; height: 100%; 
             z-index: 5; 
             background-color: #000;
+            overflow: hidden; /* Ensures scaling doesn't break boundaries */
         }
 
-        /* Video fades in on top of the wrapper's background image */
-        .video-wrapper video { 
-            width: 100%; height: 100%; 
-            object-fit: cover;
-            pointer-events: none; 
-            opacity: 0; 
+        /* Hide Vimeo iframe behind opacity 0 and scale slightly to crop black edges */
+        .video-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Passes hovers down to the frame */
+            opacity: 0;
             transition: opacity 0.4s ease;
+            transform: scale(1.02);
         }
 
         .meta-overlay {
@@ -176,7 +181,7 @@
             padding: 32px;
             background: rgba(0,0,0,0.4);
             color: #FFF;
-            opacity: 0; /* Handled dynamically by JS now */
+            opacity: 0; 
             transition: opacity 0.4s ease;
             pointer-events: none;
         }
@@ -266,7 +271,6 @@
             color: #000;
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 1200px) {
             header { padding: 20px 24px; }
             .header-left img { height: 90px; }
@@ -286,10 +290,8 @@
             .meta-title { font-size: 20px; }
             .fullscreen-gui { bottom: 20px; right: 20px; gap: 10px; }
             .fs-control-btn { padding: 8px 16px; font-size: 10px; }
-            
             .palette { gap: 4px; }
             .swatch { width: 10px; height: 10px; border-width: 0.5px; }
-            
             .mobile-fs-btn { display: inline-block; }
         }
     </style>
@@ -313,9 +315,10 @@
     </main>
 
     <script>
+        // Update these with your actual Vimeo Video IDs
         const masterProjectCatalog = [
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/worstfriend.mp4",
+                vimeoId: "76979871", 
                 poster: "worstfriend.jpg",
                 year: "2026",
                 genre: "MUSIC VIDEO",
@@ -324,7 +327,7 @@
                 colors: ["#2B2A27", "#766C5B", "#A44A3F", "#E6D6C5"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/sisters.mp4",
+                vimeoId: "1232204837",
                 poster: "sisters.jpg",
                 year: "2025",
                 genre: "MUSIC VIDEO",
@@ -333,7 +336,7 @@
                 colors: ["#0B1320", "#2F4858", "#86BBD8", "#F6F7F8"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/NewShoes.mp4",
+                vimeoId: "76979871",
                 poster: "newshoes.png",
                 year: "2026",
                 genre: "COMMERCIAL",
@@ -342,7 +345,7 @@
                 colors: ["#151515", "#3A3A3A", "#888888", "#EFEFEF"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/lily.mp4",
+                vimeoId: "1232404815",
                 poster: "lilyratchet.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -351,7 +354,7 @@
                 colors: ["#1C1E18", "#4A5240", "#D3A052", "#E8E9E1"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/pygmy.mp4",
+                vimeoId: "76979871",
                 poster: "Pygmy.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -360,7 +363,7 @@
                 colors: ["#0D0F12", "#2B3A42", "#8D99AE", "#EF233C"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/unleavened.mp4",
+                vimeoId: "76979871",
                 poster: "unleavened.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -369,7 +372,7 @@
                 colors: ["#1F1A17", "#5E4A3D", "#A68065", "#EADDCD"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/boring.mp4",
+                vimeoId: "1232404814",
                 poster: "boring.jpeg",
                 year: "2026",
                 genre: "NARRATIVE",
@@ -378,7 +381,7 @@
                 colors: ["#181818", "#4A4A4A", "#9CA3AF", "#F3F4F6"]
             },
             {
-                src: "https://pub-d93ac463c03446c8a9e6212efeb0a641.r2.dev/udontrllycareabme.mp4",
+                vimeoId: "76979871",
                 poster: "udrcabme.jpg",
                 year: "2025",
                 genre: "MUSIC VIDEO",
@@ -393,16 +396,18 @@
         let observer;
         let isFetching = false;
         const isMobile = window.matchMedia("(hover: none)").matches;
+        
+        // Global object to track Vimeo players for fullscreen sync
+        const vimeoPlayers = {};
 
         function initObserver() {
             observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if (!entry.isIntersecting) {
-                        const index = entry.target.getAttribute('data-index');
-                        const video = document.getElementById('video-' + index);
-                        if (video && !video.paused) {
-                            video.pause();
-                        }
+                    const index = entry.target.getAttribute('data-index');
+                    const player = vimeoPlayers[index];
+                    
+                    if (!entry.isIntersecting && player) {
+                        player.pause();
                     }
                 });
             }, { root: feedContainer, threshold: 0.1 });
@@ -430,9 +435,9 @@
                             <button class="fs-control-btn exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
                         </div>
                         
-                        <!-- Wrapper holds the thumbnail permanently to prevent Safari flashing -->
                         <div class="video-wrapper" style="background-image: url('${project.poster}'); background-size: cover; background-position: center;">
-                           <video id="video-${index}" data-src="${project.src}" crossorigin="anonymous" muted loop playsinline preload="none"></video>
+                            <!-- Iframe source is kept blank to save bandwidth until hover -->
+                            <iframe id="vimeo-${index}" allow="autoplay; fullscreen" frameborder="0"></iframe>
                         </div>
                         
                         <div class="meta-overlay" id="overlay-${index}">
@@ -452,88 +457,90 @@
 
                 setTimeout(() => {
                     const frame = document.getElementById(`frame-${index}`);
-                    const video = document.getElementById(`video-${index}`);
+                    const iframe = document.getElementById(`vimeo-${index}`);
                     const overlay = document.getElementById(`overlay-${index}`);
                     const muteBtn = document.getElementById(`mute-btn-${index}`);
                     const exitBtn = document.getElementById(`exit-btn-${index}`);
                     const mobileFsBtn = document.getElementById(`mobile-fs-${index}`);
 
+                    let player = null;
+                    let isPlaying = false;
                     let hideOverlayTimer;
 
                     const wakeOverlay = () => {
                         overlay.style.opacity = '1';
                         clearTimeout(hideOverlayTimer);
                         
-                        // If video is playing, auto-hide the overlay after 2.5 seconds
-                        if (!video.paused && !document.fullscreenElement) {
+                        if (isPlaying && !document.fullscreenElement) {
                             hideOverlayTimer = setTimeout(() => {
                                 overlay.style.opacity = '0';
                             }, 2500);
                         }
                     };
 
-                    // Once the video actually starts rendering frames, fade it in smoothly over the thumbnail
-                    video.addEventListener('playing', () => {
-                        video.style.opacity = '1';
-                        wakeOverlay();
-                    });
+                    const loadAndPlayVideo = () => {
+                        // URL parameters strictly disable controls, titles, and forces a silent loop
+                        if (!iframe.src) {
+                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1`;
+                            player = new Vimeo.Player(iframe);
+                            vimeoPlayers[index] = player;
 
-                    // When video is paused, immediately fade it out to show the thumbnail again
-                    video.addEventListener('pause', () => {
-                        if (!document.fullscreenElement) {
-                            video.style.opacity = '0';
+                            player.on('play', () => {
+                                isPlaying = true;
+                                iframe.style.opacity = '1';
+                                wakeOverlay();
+                            });
+
+                            player.on('pause', () => {
+                                isPlaying = false;
+                                if (!document.fullscreenElement) {
+                                    iframe.style.opacity = '0';
+                                }
+                            });
+                        }
+                        if (player) player.play().catch(() => {});
+                    };
+
+                    // DESKTOP HOVER
+                    frame.addEventListener('mouseenter', () => {
+                        if (!isMobile) {
+                            if (player && !document.fullscreenElement) player.setMuted(true);
+                            loadAndPlayVideo();
+                            wakeOverlay();
                         }
                     });
 
-                    // DESKTOP: Hover to play and wake overlay
-                    // DESKTOP: Hover to play and wake overlay
-                    frame.addEventListener('mouseenter', () => {
-                        if (!isMobile) {
-                            if (!document.fullscreenElement) video.muted = true;
-        
-        // SAFARI FIX: Force network load if the video is completely unloaded
-                             if (video.readyState === 0) {
-                                 video.load();
-                             }
-        
-                             video.play().catch(e => console.log("Playback failed:", e));
-                             wakeOverlay();
-    }
-});
-
-                    // DESKTOP: Mouse movement wakes UI back up
                     frame.addEventListener('mousemove', () => {
                         if (!isMobile && !document.fullscreenElement) {
                             wakeOverlay();
                         }
                     });
 
-                    // DESKTOP: Leave to pause instantly and hide UI
                     frame.addEventListener('mouseleave', () => {
                         if (!isMobile && !document.fullscreenElement) {
-                            video.pause();
+                            if (player) player.pause();
                             clearTimeout(hideOverlayTimer);
-                            overlay.style.opacity = '0'; // Immediately hide overlay
+                            overlay.style.opacity = '0'; 
                         }
                     });
 
-                    // CLICK INTERACTION (Mobile & Desktop)
+                    // CLICK INTERACTION
                     frame.addEventListener('click', (e) => {
                         if (e.target.tagName === 'BUTTON') return;
 
                         if (document.fullscreenElement === frame) {
-                            if (video.paused) video.play();
-                            else video.pause();
+                            if (isPlaying) player.pause();
+                            else player.play();
                         } else {
                             if (isMobile) {
                                 document.querySelectorAll('.project-frame').forEach(f => f.classList.remove('touch-active'));
                                 frame.classList.add('touch-active');
                                 
-                                if (video.paused) {
-                                    video.muted = true;
-                                    video.play().catch(() => {});
+                                if (isPlaying && player) {
+                                    player.pause();
                                 } else {
-                                    video.pause();
+                                    if (player) player.setMuted(true);
+                                    loadAndPlayVideo();
                                 }
                                 wakeOverlay();
                             } else {
@@ -546,16 +553,13 @@
                         }
                     });
 
-                    // MOBILE SPECIFIC: iOS Webkit Fullscreen Bypass
+                    // MOBILE SPECIFIC FULLSCREEN
                     if (mobileFsBtn) {
                         mobileFsBtn.addEventListener('click', (e) => {
                             e.stopPropagation();
+                            if (!iframe.src) loadAndPlayVideo();
                             
-                            if (video.webkitEnterFullscreen) {
-                                video.muted = false; 
-                                video.webkitEnterFullscreen();
-                                video.play().catch(() => {});
-                            } else if (frame.requestFullscreen) {
+                            if (frame.requestFullscreen) {
                                 frame.requestFullscreen().catch(() => {});
                             } else if (frame.webkitRequestFullscreen) {
                                 frame.webkitRequestFullscreen();
@@ -565,8 +569,12 @@
 
                     muteBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        video.muted = !video.muted;
-                        muteBtn.innerText = video.muted ? "UNMUTE" : "MUTE";
+                        if (player) {
+                            player.getMuted().then(muted => {
+                                player.setMuted(!muted);
+                                muteBtn.innerText = !muted ? "UNMUTE" : "MUTE";
+                            });
+                        }
                     });
 
                     exitBtn.addEventListener('click', (e) => {
@@ -583,23 +591,27 @@
             setTimeout(() => { isFetching = false; }, 400);
         }
 
-        // Fullscreen synchronization
         document.addEventListener('fullscreenchange', () => {
             document.querySelectorAll('.project-frame').forEach(frame => {
-                const video = frame.querySelector('video');
+                const index = frame.getAttribute('data-index');
+                const player = vimeoPlayers[index];
                 const muteBtn = frame.querySelector('.mute-btn');
                 const overlay = frame.querySelector('.meta-overlay');
 
                 if (document.fullscreenElement === frame) {
                     frame.classList.add('is-fullscreen');
-                    video.muted = false;
-                    video.play().catch(() => {});
+                    if (player) {
+                        player.setMuted(false);
+                        player.play().catch(() => {});
+                    }
                     overlay.style.opacity = '0';
                     if (muteBtn) muteBtn.innerText = "MUTE";
                 } else {
                     frame.classList.remove('is-fullscreen');
-                    video.muted = true;
-                    video.pause();
+                    if (player) {
+                        player.setMuted(true);
+                        player.pause();
+                    }
                     if (muteBtn) muteBtn.innerText = "UNMUTE";
                 }
             });
