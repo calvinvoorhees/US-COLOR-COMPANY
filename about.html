@@ -40,7 +40,7 @@
             background-color: rgba(245, 245, 245, 0.95);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            padding: 20px 48px; /* Hard pins logo to the left on desktop */
+            padding: 20px 48px; 
             border-bottom: 1px solid #000;
         }
 
@@ -186,29 +186,40 @@
         @media (max-width: 768px) {
             header { 
                 flex-direction: column; 
-                align-items: flex-start; /* Keeps logo completely flush left */
+                align-items: stretch; 
                 gap: 16px; 
                 padding: 16px 2.5vw; 
             }
+            .header-left {
+                justify-content: flex-start;
+                width: 100%;
+            }
             .header-left img { height: 45px; }
-            .company-name { font-size: 14px; }
             
+            /* Centers company name directly above navigation links */
+            .company-name { 
+                font-size: 13px; 
+                text-align: center;
+                width: 100%;
+                order: 3;
+            }
+            
+            /* Centers and equally spaces navigation headings on mobile */
             .header-nav { 
                 width: 100%; 
-                justify-content: space-between; 
-                gap: 0; 
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px; 
+                text-align: center;
+                order: 4;
             }
             .header-nav a { 
                 padding: 8px 0; 
                 font-size: 10px; 
-                flex: 1; /* Equal space distribution */
+                justify-content: center;
             }
-            /* Explicit mobile positioning: Left, Center, Right */
-            .header-nav a:nth-child(1) { justify-content: flex-start; }
-            .header-nav a:nth-child(2) { justify-content: center; }
-            .header-nav a:nth-child(3) { justify-content: flex-end; }
             
-            main { padding-top: 120px; padding-bottom: 48px; }
+            main { padding-top: 155px; padding-bottom: 48px; }
             .about-container { 
                 width: 95vw; 
                 grid-template-columns: 1fr; 
@@ -229,8 +240,8 @@
     <header>
         <a href="index.html" class="header-left">
             <img src="uscolorcompanyLOGO.PNG" alt="US COLOR COMPANY LOGO">
-            <div class="company-name">US COLOR COMPANY</div>
         </a>
+        <div class="company-name">US COLOR COMPANY</div>
         <nav class="header-nav">
             <a href="index.html">WORK</a>
             <a href="about.html" class="active">ABOUT</a>
