@@ -146,7 +146,6 @@
             cursor: default;
         }
 
-        /* HARD HIDE THE OVERLAY IN FULLSCREEN TO PREVENT DIMMING */
         .project-frame.is-fullscreen .meta-overlay {
             display: none !important;
         }
@@ -206,6 +205,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
+            width: 100%;
         }
 
         .meta-title {
@@ -295,14 +295,40 @@
             .company-name { font-size: 14px; }
             .header-nav { width: 100%; justify-content: space-between; }
             .header-nav a { padding: 8px 12px; font-size: 10px; }
-            .project-frame { width: 95vw; }
-            .project-row { padding-top: 105px; }
-            .meta-title { font-size: 20px; }
-            .fullscreen-gui { bottom: 20px; right: 20px; gap: 10px; }
-            .fs-control-btn { padding: 8px 16px; font-size: 10px; }
-            .palette { gap: 4px; }
-            .swatch { width: 10px; height: 10px; border-width: 0.5px; }
-            .mobile-fs-btn { display: inline-block; }
+            
+            /* Removes rigid 100vh vertical snapping to fix negative space */
+            main { 
+                padding-top: 105px; 
+                scroll-snap-type: none; 
+            }
+            .project-row { 
+                height: auto; 
+                padding: 32px 0; 
+                scroll-snap-align: none; 
+            }
+            .project-frame { 
+                width: 95vw; 
+                margin: 0 auto; 
+            }
+            
+            /* Unclutters the overlay completely */
+            .meta-overlay { padding: 16px; }
+            .meta-top, .palette { display: none !important; }
+            .meta-bottom { 
+                flex-direction: row; 
+                align-items: flex-end; 
+                justify-content: space-between; 
+            }
+            
+            .meta-title { font-size: 18px; letter-spacing: 0; }
+            .meta-director { font-size: 10px; margin-top: 4px; }
+            
+            .mobile-fs-btn { 
+                display: inline-block; 
+                margin-top: 0; 
+                padding: 8px 12px; 
+                font-size: 9px; 
+            }
         }
     </style>
 </head>
@@ -454,8 +480,8 @@
                                 <div>
                                     <div class="meta-title">${project.title}</div>
                                     <div class="meta-director">DIR. ${project.director}</div>
-                                    <button class="mobile-fs-btn" id="mobile-fs-${index}">FULLSCREEN</button>
                                 </div>
+                                <button class="mobile-fs-btn" id="mobile-fs-${index}">FULLSCREEN</button>
                                 <div class="palette">${swatchesHtml}</div>
                             </div>
                         </div>
@@ -477,7 +503,6 @@
                     let hideOverlayTimer;
 
                     const wakeOverlay = () => {
-                        // Prevent overlay from waking up and dimming the screen during fullscreen
                         if (document.fullscreenElement || document.webkitFullscreenElement) return;
 
                         overlay.style.opacity = '1';
@@ -492,9 +517,15 @@
 
                     const loadAndPlayVideo = () => {
                         if (!iframe.src) {
-                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&quality=1080p&initial_quality=1080p`;
+                            // Added texttrack=none to URL as first layer of subtitle defense
+                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&quality=1080p&initial_quality=1080p&texttrack=none`;
                             player = new Vimeo.Player(iframe);
                             vimeoPlayers[index] = player;
+
+                            // Second layer of defense: explicitly disable text tracks via API
+                            player.ready().then(() => {
+                                player.disableTextTrack().catch(() => {});
+                            });
 
                             player.on('play', () => {
                                 isPlaying = true;
@@ -577,12 +608,16 @@
                             if (player) {
                                 player.setVolume(1).catch(()=>{});
                                 player.setMuted(false).catch(()=>{});
-                            }
-                            
-                            if (frame.requestFullscreen) {
-                                frame.requestFullscreen().catch(() => {});
-                            } else if (frame.webkitRequestFullscreen) {
-                                frame.webkitRequestFullscreen();
+                                
+                                // Direct Vimeo API request for iOS native player override
+                                player.requestFullscreen().catch(() => {
+                                    // Fallback to container expansion if Vimeo API fails
+                                    if (frame.requestFullscreen) {
+                                        frame.requestFullscreen().catch(() => {});
+                                    } else if (frame.webkitRequestFullscreen) {
+                                        frame.webkitRequestFullscreen();
+                                    }
+                                });
                             }
                         });
                     }
@@ -646,8 +681,14 @@
             initObserver();
             appendBatch();
 
+            // Modified scroll logic to work without snap-points
             feedContainer.addEventListener('scroll', () => {
                 if (feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - (window.innerHeight * 2)) {
+                    appendBatch();
+                }
+            });
+            window.addEventListener('scroll', () => {
+                if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - (window.innerHeight * 2)) {
                     appendBatch();
                 }
             });
