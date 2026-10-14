@@ -446,7 +446,7 @@
             },
             {
                 vimeoId: "1232417804",
-                poster: "newshoes.png",
+                poster: "newshoes.jpg",
                 year: "2026",
                 genre: "COMMERCIAL",
                 title: "NEW SHOES",
@@ -503,7 +503,6 @@
         const feedContainer = document.getElementById('feed-container');
         let globalIndex = 0;
         let observer;
-        let isFetching = false;
         const isMobile = window.matchMedia("(hover: none)").matches;
         
         const vimeoPlayers = {};
@@ -522,9 +521,6 @@
         }
 
         function appendBatch() {
-            if (isFetching) return;
-            isFetching = true;
-
             masterProjectCatalog.forEach((project) => {
                 const index = globalIndex;
                 const row = document.createElement('div');
@@ -591,7 +587,7 @@
 
                     const loadAndPlayVideo = () => {
                         if (!iframe.src) {
-                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&quality=1080p&initial_quality=1080p&texttrack=none`;
+                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&texttrack=none`;
                             player = new Vimeo.Player(iframe);
                             vimeoPlayers[index] = player;
 
@@ -713,8 +709,6 @@
 
                 globalIndex++;
             });
-
-            setTimeout(() => { isFetching = false; }, 400);
         }
 
         const handleFullscreenChange = () => {
@@ -750,17 +744,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             initObserver();
             appendBatch();
-
-            feedContainer.addEventListener('scroll', () => {
-                if (feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - (window.innerHeight * 2)) {
-                    appendBatch();
-                }
-            });
-            window.addEventListener('scroll', () => {
-                if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - (window.innerHeight * 2)) {
-                    appendBatch();
-                }
-            });
         });
     </script>
 </body>
