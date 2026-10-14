@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>US COLOR COMPANY</title>
     
@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="uscolorcompanyLOGO.PNG">
 
     <!-- Vimeo Player SDK -->
-    <script src="https://player.vimeo.com/api/player.js"></script>
+    <script defer src="https://player.vimeo.com/api/player.js"></script>
 
     <style>
         * {
@@ -29,6 +29,7 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
         }
 
         /* Full-Width Header */
@@ -99,9 +100,11 @@
             color: #F5F5F5;
         }
 
-        .header-nav a:hover {
-            background-color: #000;
-            color: #F5F5F5;
+        @media (hover: hover) {
+            .header-nav a:hover {
+                background-color: #000;
+                color: #F5F5F5;
+            }
         }
 
         .mobile-bottom-nav {
@@ -112,6 +115,7 @@
         main {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             overflow-y: scroll;
             overflow-x: hidden;
             scroll-snap-type: y mandatory;
@@ -259,6 +263,9 @@
             cursor: pointer;
         }
 
+        .meta-overlay:not(.is-visible) .mobile-fs-btn {
+            pointer-events: none;
+        }
         .fullscreen-gui {
             position: absolute;
             bottom: 32px;
@@ -506,6 +513,7 @@
         const isMobile = window.matchMedia("(hover: none)").matches;
         
         const vimeoPlayers = {};
+        const MAX_ROWS = 24;
 
         function initObserver() {
             observer = new IntersectionObserver((entries) => {
@@ -514,7 +522,7 @@
                     const player = vimeoPlayers[index];
                     
                     if (!entry.isIntersecting && player) {
-                        player.pause();
+                        player.pause().catch(() => {});
                     }
                 });
             }, { root: feedContainer, threshold: 0.1 });
@@ -533,7 +541,7 @@
                 });
 
                 row.innerHTML = `
-                    <div class="project-frame" id="frame-${index}">
+                    <div class="project-frame" id="frame-${index}" data-index="${index}">
                         <div class="fullscreen-gui">
                             <button class="fs-control-btn mute-btn" id="mute-btn-${index}">UNMUTE</button>
                             <button class="fs-control-btn exit-btn" id="exit-btn-${index}">EXIT FULLSCREEN</button>
@@ -559,9 +567,9 @@
                 `;
                 feedContainer.appendChild(row);
 
-                setTimeout(() => {
+                {
                     const frame = document.getElementById(`frame-${index}`);
-                    const iframe = document.getElementById(`vimeo-${index}`);
+                    let iframe = document.getElementById(`vimeo-${index}`);
                     const poster = document.getElementById(`poster-${index}`);
                     const overlay = document.getElementById(`overlay-${index}`);
                     const muteBtn = document.getElementById(`mute-btn-${index}`);
@@ -572,50 +580,81 @@
                     let isPlaying = false;
                     let hideOverlayTimer;
 
+                    const showOverlay = (on) => {
+                        overlay.style.opacity = on ? '1' : '0';
+                        overlay.classList.toggle('is-visible', on);
+                    };
+
                     const wakeOverlay = () => {
                         if (document.fullscreenElement || document.webkitFullscreenElement) return;
 
-                        overlay.style.opacity = '1';
+                        showOverlay(true);
                         clearTimeout(hideOverlayTimer);
                         
                         if (isPlaying) {
-                            hideOverlayTimer = setTimeout(() => {
-                                overlay.style.opacity = '0';
-                            }, 2500);
+                            hideOverlayTimer = setTimeout(() => showOverlay(false), 2500);
                         }
                     };
 
-                    const loadAndPlayVideo = () => {
-                        if (!iframe.src) {
-                            iframe.src = `https://player.vimeo.com/video/${project.vimeoId}?controls=0&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&texttrack=none`;
-                            player = new Vimeo.Player(iframe);
-                            vimeoPlayers[index] = player;
+                    const embedUrl = (controls) => `https://player.vimeo.com/video/${project.vimeoId}?controls=${controls}&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&texttrack=none`;
 
-                            player.ready().then(() => {
-                                player.disableTextTrack().catch(() => {});
-                            });
-
-                            player.on('play', () => {
-                                isPlaying = true;
-                                iframe.style.opacity = '1';
-                                poster.style.opacity = '0'; 
-                                wakeOverlay();
-                            });
-
-                            player.on('pause', () => {
-                                isPlaying = false;
-                                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                                    iframe.style.opacity = '0';
-                                    poster.style.opacity = '1'; 
-                                }
-                            });
+                    const attachPlayer = (controls) => {
+                        if (iframe.src) {
+                            const fresh = iframe.cloneNode(false);
+                            fresh.removeAttribute('src');
+                            iframe.replaceWith(fresh);
+                            iframe = fresh;
                         }
-                        if (player) player.play().catch(() => {});
+                        iframe.src = embedUrl(controls);
+                        player = new Vimeo.Player(iframe);
+                        vimeoPlayers[index] = player;
+
+                        player.ready().then(() => {
+                            player.disableTextTrack().catch(() => {});
+                        });
+
+                        player.on('play', () => {
+                            iframe.style.pointerEvents = '';
+                            isPlaying = true;
+                            iframe.style.opacity = '1';
+                            poster.style.opacity = '0'; 
+                            wakeOverlay();
+                        });
+
+                        player.on('pause', () => {
+                            isPlaying = false;
+                            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                                iframe.style.opacity = '0';
+                                poster.style.opacity = '1'; 
+                            }
+                        });
+                    };
+
+                    // iOS Low Power Mode only lets a video start from a tap inside the player itself,
+                    // and Vimeo honors that tap only when its controls are on.
+                    const handToVimeo = () => {
+                        attachPlayer(1);
+                        iframe.style.pointerEvents = 'auto';
+                        iframe.style.opacity = '1';
+                    };
+
+                    const pauseOthers = () => {
+                        Object.entries(vimeoPlayers).forEach(([i, p]) => {
+                            if (i !== String(index)) p.pause().catch(() => {});
+                        });
+                    };
+
+                    const loadAndPlayVideo = () => {
+                        pauseOthers();
+                        if (!iframe.src) attachPlayer(0);
+                        if (player) player.play().catch((e) => {
+                            if (e.name === 'NotAllowedError' && isMobile) handToVimeo();
+                        });
                     };
 
                     frame.addEventListener('mouseenter', () => {
                         if (!isMobile) {
-                            if (player && !document.fullscreenElement && !document.webkitFullscreenElement) player.setMuted(true);
+                            if (player && !document.fullscreenElement && !document.webkitFullscreenElement) player.setMuted(true).catch(() => {});
                             loadAndPlayVideo();
                             wakeOverlay();
                         }
@@ -629,9 +668,9 @@
 
                     frame.addEventListener('mouseleave', () => {
                         if (!isMobile && !document.fullscreenElement && !document.webkitFullscreenElement) {
-                            if (player) player.pause();
+                            if (player) player.pause().catch(() => {});
                             clearTimeout(hideOverlayTimer);
-                            overlay.style.opacity = '0'; 
+                            showOverlay(false);
                         }
                     });
 
@@ -639,21 +678,19 @@
                         if (e.target.tagName === 'BUTTON') return;
 
                         if (document.fullscreenElement === frame || document.webkitFullscreenElement === frame) {
-                            if (isPlaying) player.pause();
-                            else player.play();
+                            if (isPlaying) player.pause().catch(() => {});
+                            else player.play().catch(() => {});
                         } else {
                             if (isMobile) {
-                                document.querySelectorAll('.project-frame').forEach(f => f.classList.remove('touch-active'));
-                                frame.classList.add('touch-active');
-                                
                                 if (isPlaying && player) {
-                                    player.pause();
+                                    player.pause().catch(() => {});
                                 } else {
-                                    if (player) player.setMuted(true);
+                                    if (player) player.setMuted(true).catch(() => {});
                                     loadAndPlayVideo();
                                 }
                                 wakeOverlay();
                             } else {
+                                if (!iframe.src) loadAndPlayVideo();
                                 if (player) {
                                     player.setVolume(1).catch(()=>{});
                                     player.setMuted(false).catch(()=>{});
@@ -692,7 +729,7 @@
                         e.stopPropagation();
                         if (player) {
                             player.getMuted().then(muted => {
-                                player.setMuted(!muted);
+                                player.setMuted(!muted).catch(() => {});
                                 muteBtn.innerText = !muted ? "UNMUTE" : "MUTE";
                             });
                         }
@@ -705,7 +742,7 @@
                     });
 
                     observer.observe(row);
-                }, 50);
+                }
 
                 globalIndex++;
             });
@@ -726,6 +763,7 @@
                         player.play().catch(() => {});
                     }
                     overlay.style.opacity = '0';
+                    overlay.classList.remove('is-visible');
                     if (muteBtn) muteBtn.innerText = "MUTE";
                 } else {
                     frame.classList.remove('is-fullscreen');
@@ -741,9 +779,46 @@
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
+        // Rows more than a screen above the viewport leave the window once it overflows.
+        // Their players are destroyed and the view is kept on the same row: browsers that anchor
+        // scrolling already shift the position when rows above are removed, so only the remainder is applied.
+        function trimAbove() {
+            const scrollTopBefore = feedContainer.scrollTop;
+            let removedHeight = 0;
+            for (const row of feedContainer.querySelectorAll('.project-row')) {
+                if (feedContainer.querySelectorAll('.project-row').length <= MAX_ROWS) break;
+                if (row.offsetTop + row.offsetHeight >= feedContainer.scrollTop - feedContainer.clientHeight) break;
+                const index = row.getAttribute('data-index');
+                if (vimeoPlayers[index]) {
+                    vimeoPlayers[index].destroy().catch(() => {});
+                    delete vimeoPlayers[index];
+                }
+                observer.unobserve(row);
+                removedHeight += row.offsetHeight;
+                row.remove();
+            }
+            const target = scrollTopBefore - removedHeight;
+            if (removedHeight && Math.abs(feedContainer.scrollTop - target) > 1) {
+                feedContainer.style.scrollBehavior = 'auto';
+                feedContainer.scrollTop = target;
+                feedContainer.style.scrollBehavior = '';
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             initObserver();
             appendBatch();
+
+            // Append as soon as the bottom is near; trim only once scrolling has settled, because a
+            // snap animation keeps firing scroll events and removing rows mid-animation lands on the wrong row.
+            let trimTimer;
+            feedContainer.addEventListener('scroll', () => {
+                if (feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - feedContainer.clientHeight * 2) {
+                    appendBatch();
+                }
+                clearTimeout(trimTimer);
+                trimTimer = setTimeout(trimAbove, 200);
+            });
         });
     </script>
 </body>
