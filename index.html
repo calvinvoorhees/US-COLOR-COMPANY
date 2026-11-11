@@ -180,7 +180,7 @@
             background-size: cover;
             background-position: center;
             z-index: 1;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.3s ease;
         }
 
         .video-wrapper iframe {
@@ -190,7 +190,7 @@
             pointer-events: none; 
             opacity: 0;
             z-index: 2;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.3s ease;
         }
 
         .meta-overlay {
@@ -328,7 +328,6 @@
                 display: none;
             }
 
-            /* Shifted over slightly past absolute center to balance visual weight against the left flag logo */
             .company-name.mobile-only { 
                 position: absolute;
                 left: 54%;
@@ -599,13 +598,16 @@
                     const embedUrl = (controls) => `https://player.vimeo.com/video/${project.vimeoId}?controls=${controls}&title=0&byline=0&portrait=0&muted=1&loop=1&autopause=0&dnt=1&transparent=0&texttrack=none`;
 
                     const attachPlayer = (controls) => {
+                        const targetUrl = embedUrl(controls);
+                        if (iframe.src === targetUrl && player) return;
+
                         if (iframe.src) {
                             const fresh = iframe.cloneNode(false);
                             fresh.removeAttribute('src');
                             iframe.replaceWith(fresh);
                             iframe = fresh;
                         }
-                        iframe.src = embedUrl(controls);
+                        iframe.src = targetUrl;
                         player = new Vimeo.Player(iframe);
                         vimeoPlayers[index] = player;
 
@@ -630,8 +632,11 @@
                         });
                     };
 
-                    // iOS Low Power Mode only lets a video start from a tap inside the player itself,
-                    // and Vimeo honors that tap only when its controls are on.
+                    // Preload player immediately on desktop so hovering plays instantly
+                    if (!isMobile) {
+                        attachPlayer(0);
+                    }
+
                     const handToVimeo = () => {
                         attachPlayer(1);
                         iframe.style.pointerEvents = 'auto';
@@ -647,14 +652,18 @@
                     const loadAndPlayVideo = () => {
                         pauseOthers();
                         if (!iframe.src) attachPlayer(0);
-                        if (player) player.play().catch((e) => {
-                            if (e.name === 'NotAllowedError' && isMobile) handToVimeo();
-                        });
+                        if (player) {
+                            player.play().catch((e) => {
+                                if (e.name === 'NotAllowedError' && isMobile) handToVimeo();
+                            });
+                        }
                     };
 
                     frame.addEventListener('mouseenter', () => {
                         if (!isMobile) {
-                            if (player && !document.fullscreenElement && !document.webkitFullscreenElement) player.setMuted(true).catch(() => {});
+                            if (player && !document.fullscreenElement && !document.webkitFullscreenElement) {
+                                player.setMuted(true).catch(() => {});
+                            }
                             loadAndPlayVideo();
                             wakeOverlay();
                         }
@@ -779,9 +788,6 @@
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
-        // Rows more than a screen above the viewport leave the window once it overflows.
-        // Their players are destroyed and the view is kept on the same row: browsers that anchor
-        // scrolling already shift the position when rows above are removed, so only the remainder is applied.
         function trimAbove() {
             const scrollTopBefore = feedContainer.scrollTop;
             let removedHeight = 0;
@@ -809,8 +815,6 @@
             initObserver();
             appendBatch();
 
-            // Append as soon as the bottom is near; trim only once scrolling has settled, because a
-            // snap animation keeps firing scroll events and removing rows mid-animation lands on the wrong row.
             let trimTimer;
             feedContainer.addEventListener('scroll', () => {
                 if (feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - feedContainer.clientHeight * 2) {
