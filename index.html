@@ -180,7 +180,7 @@
             background-size: cover;
             background-position: center;
             z-index: 1;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
 
         .video-wrapper iframe {
@@ -190,7 +190,7 @@
             pointer-events: none; 
             opacity: 0;
             z-index: 2;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
 
         .meta-overlay {
@@ -229,7 +229,8 @@
             line-height: 1.1;
         }
 
-        .meta-director {
+        .meta-director,
+        .meta-colorist {
             font-size: 13px;
             letter-spacing: 1px;
             color: #CCC;
@@ -391,7 +392,8 @@
             }
             
             .meta-title { font-size: 18px; letter-spacing: 0; }
-            .meta-director { font-size: 10px; margin-top: 4px; }
+            .meta-director,
+            .meta-colorist { font-size: 10px; margin-top: 2px; }
             
             .mobile-fs-btn { 
                 display: inline-block; 
@@ -557,6 +559,7 @@
                                 <div>
                                     <div class="meta-title">${project.title}</div>
                                     <div class="meta-director">DIR. ${project.director}</div>
+                                    <div class="meta-colorist">COLORIST: CALVIN VOORHEES</div>
                                 </div>
                                 <button class="mobile-fs-btn" id="mobile-fs-${index}">FULLSCREEN</button>
                                 <div class="palette">${swatchesHtml}</div>
@@ -616,10 +619,7 @@
                         });
 
                         player.on('play', () => {
-                            iframe.style.pointerEvents = '';
                             isPlaying = true;
-                            iframe.style.opacity = '1';
-                            poster.style.opacity = '0'; 
                             wakeOverlay();
                         });
 
@@ -661,6 +661,10 @@
 
                     frame.addEventListener('mouseenter', () => {
                         if (!isMobile) {
+                            // Instantly switch visibility so user gets immediate response on hover
+                            poster.style.opacity = '0';
+                            iframe.style.opacity = '1';
+
                             if (player && !document.fullscreenElement && !document.webkitFullscreenElement) {
                                 player.setMuted(true).catch(() => {});
                             }
@@ -678,6 +682,8 @@
                     frame.addEventListener('mouseleave', () => {
                         if (!isMobile && !document.fullscreenElement && !document.webkitFullscreenElement) {
                             if (player) player.pause().catch(() => {});
+                            iframe.style.opacity = '0';
+                            poster.style.opacity = '1';
                             clearTimeout(hideOverlayTimer);
                             showOverlay(false);
                         }
